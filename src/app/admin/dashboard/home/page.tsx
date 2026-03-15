@@ -59,6 +59,7 @@ export default function HomeManagementPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("folder", "staynamcheon/home");
 
       const uploadRes = await fetch("/api/admin/upload", {
         method: "POST",
