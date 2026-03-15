@@ -335,7 +335,7 @@ export default function GalleryManagementPage() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragStart={(event) => setActiveId(event.active.id)}
+        onDragStart={(event) => setActiveId(String(event.active.id))}
         onDragCancel={() => setActiveId(null)}
         onDragEnd={handleDragEnd}
       >
