@@ -1,26 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-border: hsl(0, 0%, 90%);
+  --color-input: hsl(0, 0%, 90%);
+  --color-ring: hsl(35, 30%, 57%);
+  
+  --color-background: hsl(50, 20%, 99%);
+  --color-foreground: hsl(0, 0%, 10%);
+  
+  --color-primary: hsl(0, 0%, 10%);
+  --color-primary-foreground: hsl(50, 20%, 99%);
+  
+  --color-secondary: hsl(35, 30%, 57%);
+  --color-secondary-foreground: hsl(50, 20%, 99%);
+  
+  --color-muted: hsl(40, 10%, 95%);
+  --color-muted-foreground: hsl(0, 0%, 45%);
+  
+  --color-accent: hsl(35, 30%, 57%);
+  --color-accent-foreground: hsl(0, 0%, 10%);
+  
+  --radius: 0.75rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .section-spacing {
+    @apply py-20 md:py-32;
+  }
+
+  .hero-overlay {
+    background: hsla(0, 0%, 0%, 0.4);
+  }
+
+  .card-border {
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 40px -10px hsla(0, 0%, 0%, 0.05);
+  }
+
+  .fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  .fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .image-hover {
+    @apply overflow-hidden;
+  }
+
+  .image-hover img {
+    transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.8s ease;
+  }
+
+  .image-hover:hover img {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+  }
+
+  /* Legacy utility classes maintained for compatibility if needed */
+  .section-padding {
+    @apply px-6 md:px-12 lg:px-20 xl:px-32;
+  }
 }

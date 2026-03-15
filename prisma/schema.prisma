@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique(map: "Admin_username_key")
+  password  String
+  createdAt DateTime
+}
+
+model reservations {
+  id             BigInt   @id @default(autoincrement())
+  type           String
+  category       String
+  use_date       DateTime
+  nights         Int
+  quantity       Int
+  guest_name     String
+  phone          String
+  people_count   Int
+  user_type      String
+  total_amount   Int
+  extra_amount   Int      @default(0)
+  payment_status String
+  deposit_date   DateTime
+  cancel_date    DateTime
+  source         String
+  memo           String
+  created_at     DateTime @default(now())
+  updated_at     DateTime
+}
+
+// --- StayNamcheon Management Models (NEW) ---
+
+model StayAdmin {
+  id        String   @id @default(cuid())
+  adminId   String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stay_admins")
+}
+
+model StayPageContent {
+  id          String   @id @default(cuid())
+  page        String   // e.g., "home", "pension", "cafe"
+  section     String   // e.g., "hero", "about"
+  key         String   // e.g., "title", "description", "imageUrl"
+  value       String   @db.Text
+  type        String   @default("text") // "text", "image", "number"
+  category    String?  // Optional grouping
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([page, section, key])
+  @@map("stay_page_contents")
+}
+
+model StayGalleryItem {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  imageUrl    String
+  publicId    String?
+  videoUrl    String?
+  type        String   @default("image") // "image", "video"
+  order       Int      @default(0)
+  isVisible   Boolean  @default(true)
+  category    String?  // e.g., "interior", "exterior", "landscape"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("stay_gallery_items")
+}

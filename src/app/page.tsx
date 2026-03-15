@@ -1,65 +1,98 @@
-import Image from "next/image";
+import prisma from "@/lib/db";
+import HeroSection from "@/components/HeroSection";
+import ScrollSection from "@/components/ScrollSection";
+import GallerySection from "@/components/GallerySection";
+import ReservationSection from "@/components/ReservationSection";
+import Footer from "@/components/Footer";
 
-export default function Home() {
+export default async function Home() {
+  const contents = await prisma.stayPageContent.findMany({
+    where: { page: "home" }
+  });
+
+  const getSectionContent = (section: string) => {
+    const sectionData: any = {};
+    contents.filter(c => c.section === section).forEach(c => {
+      sectionData[c.key] = c.value;
+    });
+    return sectionData;
+  };
+
+  const pensionContent = getSectionContent("pension");
+  const campnicContent = getSectionContent("campnic");
+  const cafeContent = getSectionContent("cafe");
+  const otherContent = getSectionContent("other");
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="bg-background">
+      <HeroSection />
+
+      <ScrollSection
+        id="pension"
+        label={pensionContent.label || "Accommodation"}
+        title={pensionContent.title || "Pension"}
+        description={pensionContent.description || "Thoughtfully designed rooms that frame the surrounding landscape. Floor-to-ceiling windows, warm wood interiors, and the quiet comfort of a home away from home."}
+        image={pensionContent.imageUrl || "/images/lovable/pension.jpg"}
+        imageAlt="Modern pension room with forest view"
+        exploreHref="/pension"
+      />
+
+      <div className="section-padding">
+        <div className="border-t border-border" />
+      </div>
+
+      <ScrollSection
+        id="campnic"
+        label={campnicContent.label || "Outdoor Living"}
+        title={campnicContent.title || "Campnic"}
+        description={campnicContent.description || "Where camping meets picnic. Our curated glamping experience pairs the thrill of sleeping under the stars with the comforts you deserve — cozy tents, warm lights, and mountain air."}
+        image={campnicContent.imageUrl || "/images/lovable/campnic.jpg"}
+        imageAlt="Luxury glamping tent at golden hour"
+        reverse
+        exploreHref="/campnic"
+      />
+
+      <div className="section-padding">
+        <div className="border-t border-border" />
+      </div>
+
+      <ScrollSection
+        id="cafe"
+        label={cafeContent.label || "Taste & Aroma"}
+        title={cafeContent.title || "Cafe"}
+        description={cafeContent.description || "A minimalist cafe nestled within the property. Hand-dripped coffee, seasonal teas, and light bites — all served alongside panoramic views of the surrounding forest."}
+        image={cafeContent.imageUrl || "/images/lovable/cafe.jpg"}
+        imageAlt="Minimalist cafe with pour-over coffee"
+        exploreHref="/cafe"
+      />
+
+      <div className="section-padding">
+        <div className="border-t border-border" />
+      </div>
+
+      <ScrollSection
+        id="other"
+        label={otherContent.label || "Experiences"}
+        title={otherContent.title || "Other"}
+        description={otherContent.description || "Discover hidden corners of Namcheon. From tranquil hammock terraces with mountain views to evening firepits under the stars — every moment here is designed for stillness."}
+        image={otherContent.imageUrl || "/images/lovable/other.jpg"}
+        imageAlt="Outdoor terrace with hammock and mountain view"
+        reverse
+        exploreHref="/other"
+      />
+
+      <div className="section-padding">
+        <div className="border-t border-border" />
+      </div>
+
+      <GallerySection />
+
+      <div className="section-padding">
+        <div className="border-t border-border" />
+      </div>
+
+      <ReservationSection />
+      <Footer />
     </div>
   );
 }
