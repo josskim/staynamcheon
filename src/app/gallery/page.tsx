@@ -6,7 +6,16 @@ import { ChevronLeft, ChevronRight, PlayCircle, Share2, X, Play } from "lucide-r
 import { cn } from "@/lib/utils";
 import ScrollReveal from "@/components/ScrollReveal";
 
-const fallbackItems = [
+type GalleryItem = {
+  id: string;
+  type: "image" | "video";
+  src: string;
+  alt?: string;
+  category?: string;
+  poster?: string;
+};
+
+const fallbackItems: GalleryItem[] = [
   { id: "1", type: "video", src: "/videos/movie.mp4", alt: "Cinematic Namcheon", category: "Cinema" },
   { id: "2", type: "image", src: "/images/lovable/hero.jpg", alt: "Golden Hour Terrace", category: "Nature" },
   { id: "3", type: "image", src: "/images/lovable/pension.jpg", alt: "Modern Suite Interior", category: "Design" },
@@ -19,15 +28,6 @@ const fallbackItems = [
   { id: "10", type: "image", src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1200", alt: "River Sunset", category: "Peace" },
   { id: "11", type: "image", src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1200", alt: "High Mountains", category: "Nature" },
 ];
-
-type GalleryItem = {
-  id: string;
-  type: "image" | "video";
-  src: string;
-  alt?: string;
-  category?: string;
-  poster?: string;
-};
 
 export default function GalleryPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
