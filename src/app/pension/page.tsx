@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Hero from "@/components/Hero";
 import RoomCard from "@/components/RoomCard";
 import RoomGallery from "@/components/RoomGallery";

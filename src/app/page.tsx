@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import prisma from "@/lib/db";
 import HeroSection from "@/components/HeroSection";
 import ScrollSection from "@/components/ScrollSection";

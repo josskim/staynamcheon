@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";
 import Footer from "@/components/Footer";
