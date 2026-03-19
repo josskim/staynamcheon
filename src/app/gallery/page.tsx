@@ -189,15 +189,15 @@ export default function GalleryPage() {
   };
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden bg-[#7c3aed] font-body p-4 md:p-8 pt-[100px] md:pt-[130px]">
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#1a1a2e] via-[#4a148c] to-[#c2185b] animate-gradient-slow opacity-100" />
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.3),transparent_70%)]" />
+    <main className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden bg-[#171212] font-body p-4 md:p-8 pt-[100px] md:pt-[130px]">
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#171212] via-[#1e1616] to-[#2a1f1f] opacity-100" />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(219,84,97,0.08),transparent_60%)]" />
 
       {/* Hero Carousel Container */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 w-full max-w-[1240px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] shadow-2xl overflow-hidden flex flex-col items-center p-6 md:p-12 mb-16"
+        className="relative z-10 w-full max-w-[1240px] bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-[40px] shadow-2xl overflow-hidden flex flex-col items-center p-6 md:p-12 mb-16"
       >
         {/* Coverflow Carousel Section */}
         <div className="relative w-full h-[300px] md:h-[500px] mb-6 max-md:mb-3 flex items-center justify-center overflow-visible">
@@ -233,7 +233,7 @@ export default function GalleryPage() {
                   onClick={() => absPosition === 0 && setSelectedItem(item)}
                   className={cn(
                     "absolute w-[80%] md:w-[60%] aspect-[16/9] rounded-3xl overflow-hidden bg-black/20 shadow-2xl transition-shadow duration-300",
-                    absPosition === 0 ? "cursor-pointer border-2 border-white/20 ring-4 ring-white/10" : "cursor-grab active:cursor-grabbing"
+                    absPosition === 0 ? "cursor-pointer border-2 border-white/15 ring-4 ring-white/[0.06]" : "cursor-grab active:cursor-grabbing"
                   )}
                 >
                   {item.type === "video" ? (
@@ -250,10 +250,10 @@ export default function GalleryPage() {
             })}
           </div>
 
-          <button onClick={prevSlide} className="absolute left-4 z-40 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all">
+          <button onClick={prevSlide} className="absolute left-4 z-40 p-3 rounded-full bg-white/[0.06] hover:bg-white/15 text-white/70 hover:text-white border border-white/10 backdrop-blur-md transition-all">
             <ChevronLeft size={24} />
           </button>
-          <button onClick={nextSlide} className="absolute right-4 z-40 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all">
+          <button onClick={nextSlide} className="absolute right-4 z-40 p-3 rounded-full bg-white/[0.06] hover:bg-white/15 text-white/70 hover:text-white border border-white/10 backdrop-blur-md transition-all">
             <ChevronRight size={24} />
           </button>
         </div>
@@ -307,7 +307,7 @@ export default function GalleryPage() {
         <button
           onClick={handleShare}
           aria-label="Share Gallery"
-          className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/50 active:scale-95"
+          className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-md transition-all hover:bg-white/15 hover:text-white hover:border-white/30 active:scale-95"
         >
           <Share2 size={16} className="transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
         </button>
@@ -328,7 +328,7 @@ export default function GalleryPage() {
           {[...displayItems, ...displayItems].map((item, i) => (
             <ScrollReveal key={`${item.id}-${i}`} delay={i % 4 * 0.1}>
               <div
-                className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm shadow-xl"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm shadow-xl hover:border-white/15 transition-colors"
                 onClick={() => setSelectedItem(item)}
               >
                 {item.type === "video" ? (

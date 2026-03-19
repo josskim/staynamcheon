@@ -100,14 +100,7 @@ export default async function OtherPage() {
           </div>
         </ScrollReveal>
         <RoomGallery 
-          images={[
-            { src: "/images/lovable/gallery1.jpg", alt: "namcheon 1" },
-            { src: "/images/lovable/gallery2.jpg", alt: "namcheon 2" },
-            { src: "/images/lovable/gallery3.jpg", alt: "namcheon 3" },
-            { src: "/videos/movie.mp4", alt: "namcheon clip" },
-            { src: "/images/lovable/pension.jpg", alt: "namcheon 4" },
-            { src: "/images/lovable/cafe.jpg", alt: "namcheon 5" },
-          ]} 
+          images={getJson("gallery", "images", [])} 
         />
       </div>
 

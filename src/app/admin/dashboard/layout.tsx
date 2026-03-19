@@ -12,7 +12,8 @@ import {
   Bed,
   Tent,
   Compass,
-  Layout
+  Layout,
+  CalendarDays
 } from "lucide-react";
 
 import { LogoutButton } from "./LogoutButton";
@@ -36,6 +37,7 @@ export default async function AdminDashboardLayout({
     { name: "Campnic", icon: Tent, href: "/admin/dashboard/campnic" },
     { name: "Cafe", icon: Coffee, href: "/admin/dashboard/cafe" },
     { name: "Other", icon: Compass, href: "/admin/dashboard/other" },
+    { name: "Reservation", icon: CalendarDays, href: "/admin/dashboard/reservation" },
     { name: "Gallery", icon: ImageIcon, href: "/admin/dashboard/gallery" },
     { name: "Settings", icon: Settings, href: "/admin/dashboard/settings" },
   ];

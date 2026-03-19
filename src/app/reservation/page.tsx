@@ -1,12 +1,37 @@
-"use client";
-
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";
 import Footer from "@/components/Footer";
-import { Phone, Calendar, Clock, AlertCircle } from "lucide-react";
+import { Phone, Clock, AlertCircle } from "lucide-react";
+import prisma from "@/lib/db";
 
-export default function ReservationPage() {
-  const refundPolicy = [
+export default async function ReservationPage() {
+  const content = await prisma.stayPageContent.findMany({
+    where: { page: "reservation" }
+  });
+
+  const getVal = (section: string, key: string, fallback: string = "") => {
+    return content.find(c => c.section === section && c.key === key)?.value || fallback;
+  };
+
+  const getJson = (section: string, key: string, fallback: any = []) => {
+    const val = content.find(c => c.section === section && c.key === key)?.value;
+    try {
+      return val ? JSON.parse(val) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const hero = {
+    title: getVal("hero", "title", "Reservation"),
+    subtitle: getVal("hero", "subtitle", "StayNamcheon Reservation & Policy"),
+    backgroundImage: getVal("hero", "imageUrl", "/images/lovable/hero.jpg")
+  };
+
+  const phone = getVal("contact", "phone", "010-9038-5822");
+  const checkin = getVal("info", "checkin", "오후 3:00");
+
+  const refundPolicy = getJson("policy", "refund", [
     { period: "이용일 기준 10일전 취소", refund: "전액환불" },
     { period: "이용일 기준 7~9일전 취소", refund: "10% 공제후 환불" },
     { period: "이용일 기준 6일전 취소", refund: "20% 공제후 환불" },
@@ -15,14 +40,14 @@ export default function ReservationPage() {
     { period: "이용일 기준 3일전 취소", refund: "50% 공제후 환불" },
     { period: "이용일 기준 2일전 취소", refund: "70% 공제후 환불" },
     { period: "이용일 기준 1일전 또는 당일 취소", refund: "환불불가" },
-  ];
+  ]);
 
   return (
     <main className="min-h-screen bg-background pb-0">
       <Hero 
-        title="Reservation" 
-        subtitle="StayNamcheon Reservation & Policy" 
-        backgroundImage="/images/lovable/hero.jpg"
+        title={hero.title}
+        subtitle={hero.subtitle}
+        backgroundImage={hero.backgroundImage}
       />
 
       <section className="section-spacing">
@@ -48,10 +73,10 @@ export default function ReservationPage() {
                 </div>
                 <h3 className="text-sm font-bold tracking-widest uppercase mb-4 text-secondary">StayNamcheon 예약문의</h3>
                 <a 
-                  href="tel:010-9038-5822" 
+                  href={`tel:${phone}`}
                   className="text-3xl md:text-4xl font-semibold tracking-tight hover:text-secondary transition-colors"
                 >
-                  010-9038-5822
+                  {phone}
                 </a>
               </div>
             </ScrollReveal>
@@ -63,7 +88,7 @@ export default function ReservationPage() {
                 </div>
                 <h3 className="text-sm font-bold tracking-widest uppercase mb-4 opacity-60">체크인 기준 시간</h3>
                 <p className="text-3xl md:text-4xl font-semibold tracking-tight">
-                  오후 3:00
+                  {checkin}
                 </p>
                 <p className="mt-4 text-sm text-muted-foreground">
                   * 환불 규정은 체크인 시간을 기준으로 적용됩니다.
@@ -84,7 +109,7 @@ export default function ReservationPage() {
                 <span className="text-sm font-bold tracking-widest uppercase text-right">환불 규정</span>
               </div>
               <div className="divide-y divide-border">
-                {refundPolicy.map((item, idx) => (
+                {refundPolicy.map((item: any, idx: number) => (
                   <div key={idx} className="grid grid-cols-2 p-6 hover:bg-muted/30 transition-colors">
                     <span className="text-sm md:text-base font-medium">{item.period}</span>
                     <span className={`text-sm md:text-base font-semibold text-right ${idx === refundPolicy.length - 1 ? 'text-destructive' : 'text-foreground'}`}>
