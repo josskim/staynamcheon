@@ -26,6 +26,19 @@ export async function POST(request: Request) {
 
     // Upload to Cloudinary using a promise to handle the stream
     const result: any = await new Promise((resolve, reject) => {
+      // Diagnostic log for Cloudinary and Environment Variables
+      console.log("Upload Request:", { 
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        folder,
+        envCheck: {
+          hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+          hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+          hasApiSecret: !!process.env.CLOUDINARY_API_SECRET
+        }
+      });
+
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder,
@@ -46,8 +59,12 @@ export async function POST(request: Request) {
             : undefined,
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            console.error("Cloudinary Stream Error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
         }
       );
       uploadStream.end(buffer);
@@ -59,10 +76,13 @@ export async function POST(request: Request) {
       publicId: result.public_id,
       posterUrl: Array.isArray(result?.eager) && result.eager[0]?.secure_url ? result.eager[0].secure_url : undefined,
     });
-  } catch (error) {
-    console.error("Cloudinary upload error:", error);
+  } catch (error: any) {
+    console.error("Full Upload Route Error:", error);
     return NextResponse.json(
-      { error: "Failed to upload image" },
+      { 
+        error: "Failed to upload image", 
+        details: error.message || String(error) 
+      },
       { status: 500 }
     );
   }
