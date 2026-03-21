@@ -13,10 +13,22 @@ export async function POST(request: Request) {
   try {
     const { paramsToSign } = await request.json();
     
+    // Diagnostic log
+    console.log("Signature Request:", {
+      paramsToSign,
+      hasSecret: !!process.env.CLOUDINARY_API_SECRET,
+      hasKey: !!process.env.CLOUDINARY_API_KEY,
+      hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME
+    });
+
+    if (!process.env.CLOUDINARY_API_SECRET) {
+       throw new Error("CLOUDINARY_API_SECRET is not set in environment variables.");
+    }
+
     // Generate signature using Cloudinary SDK
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign,
-      process.env.CLOUDINARY_API_SECRET!
+      process.env.CLOUDINARY_API_SECRET
     );
 
     return NextResponse.json({ 
@@ -24,8 +36,14 @@ export async function POST(request: Request) {
       apiKey: process.env.CLOUDINARY_API_KEY,
       cloudName: process.env.CLOUDINARY_CLOUD_NAME
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signature generation error:", error);
-    return NextResponse.json({ error: "Failed to generate signature" }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: "Failed to generate signature", 
+        details: error.message || String(error) 
+      }, 
+      { status: 500 }
+    );
   }
 }
