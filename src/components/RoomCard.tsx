@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ScrollReveal from "./ScrollReveal";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 
 interface PriceItem {
   price: string;
@@ -45,7 +47,41 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               loading="lazy"
             />
           )}
+
+          {/* Navigation Buttons */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/50 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-10"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIndex((prev) => (prev + 1) % images.length);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/50 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-10"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
+
+          {/* Description Overlay */}
+          {currentImage.alt && (
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+              <p className="text-white text-sm font-medium tracking-wide drop-shadow-md">
+                {currentImage.alt}
+              </p>
+            </div>
+          )}
         </div>
+
         {images.length > 1 && (
           <div className="flex gap-3 p-4 overflow-x-auto bg-muted/30 border-b border-border hide-scrollbar">
             {images.map((img, idx) => (
