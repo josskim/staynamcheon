@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import ScrollReveal from "./ScrollReveal";
 
 interface PriceItem {
@@ -14,7 +17,6 @@ interface RoomCardProps {
   index: number;
 }
 
-import { useState } from "react";
 
 const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCardProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
