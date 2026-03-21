@@ -31,10 +31,11 @@ const RoomCard = ({ name, description, image, prices, index }: RoomCardProps) =>
               <h3 className="text-3xl font-semibold tracking-tight md:text-4xl">
                 {name}
               </h3>
-              <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+              <p className="mt-4 text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {description}
               </p>
             </div>
+
             <div className="flex-1 min-w-[300px] space-y-4">
               {prices.map((item, i) => (
                 <div
