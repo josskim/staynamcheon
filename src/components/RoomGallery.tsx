@@ -83,12 +83,20 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                       loading="lazy"
                     />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-black/10">
-                    <span className="text-white text-sm font-light tracking-[0.3em] uppercase">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-black/10 z-10">
+                    <span className="text-white text-sm font-light tracking-[0.3em] uppercase drop-shadow-md">
                       {isVideo(item.src) ? "Play Video" : "View Image"}
                     </span>
                   </div>
+                  {item.alt && (
+                    <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-20 pointer-events-none">
+                      <p className="text-white text-sm font-medium tracking-wide drop-shadow-md line-clamp-2">
+                        {item.alt}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
               </ScrollReveal>
             ))}
           </div>
@@ -125,7 +133,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="px-4"
+              className="px-4 relative"
             >
               {isVideo(images[lightboxIndex].src) ? (
                 <video
@@ -143,6 +151,13 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                   className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
                   onClick={(e) => e.stopPropagation()}
                 />
+              )}
+              {images[lightboxIndex].alt && (
+                <div className="absolute bottom-0 left-4 right-4 p-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-b-lg pointer-events-none">
+                  <p className="text-white text-center text-lg drop-shadow-md">
+                    {images[lightboxIndex].alt}
+                  </p>
+                </div>
               )}
             </motion.div>
             <button
