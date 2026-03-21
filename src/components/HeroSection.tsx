@@ -35,6 +35,13 @@ const HeroSection = () => {
           src={content?.imageUrl || "/images/lovable/hero.jpg"}
           alt="Stay Namcheon — a serene pension retreat nestled in the Korean countryside"
           className="h-full w-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            const defaultHero = "/images/lovable/hero.jpg";
+            if (target.src !== defaultHero) {
+              target.src = defaultHero;
+            }
+          }}
         />
         <div className="absolute inset-0 bg-foreground/35" />
       </motion.div>

@@ -30,6 +30,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import UploadModal from "@/components/admin/UploadModal";
+import { getThumbnailUrl } from "@/lib/cloudinary";
 
 interface GalleryItem {
   id: string;
@@ -289,17 +290,17 @@ export default function GalleryManagementPage() {
   if (loading) return <div className="p-12 animate-pulse font-medium text-[#856669]">Loading gallery...</div>;
 
   return (
-    <div className="space-y-8 max-w-7xl pb-40">
-      <div className="flex items-center justify-between bg-white px-8 py-6 rounded-3xl border border-[#e4dcdd] shadow-sm">
+    <div className="space-y-6 md:space-y-8 max-w-7xl pb-40">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between bg-white px-6 md:px-8 py-6 rounded-3xl border border-[#e4dcdd] shadow-sm gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#171212] tracking-tight">Gallery Management</h1>
-          <p className="text-[#856669] mt-1 text-sm font-medium">Drag to reorder. New items appear with a green border before saving.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#171212] tracking-tight">Gallery Management</h1>
+          <p className="text-[#856669] mt-1 text-xs md:text-sm font-medium">Drag to reorder. New items appear with a green border before saving.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 md:gap-4">
           {selectedIds.size > 0 && (
             <button
               onClick={deleteSelected}
-              className="flex items-center gap-2 bg-red-500 text-white px-5 py-3 rounded-2xl font-bold text-sm hover:brightness-110 active:scale-95 transition-all"
+              className="flex items-center gap-2 bg-red-500 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-2xl font-bold text-xs md:text-sm hover:brightness-110 active:scale-95 transition-all w-full sm:w-auto justify-center"
             >
               <Trash2 size={18} />
               Delete Selected ({selectedIds.size})
@@ -308,7 +309,7 @@ export default function GalleryManagementPage() {
           <button
             onClick={cleanupTempFolder}
             disabled={cleaningTemp}
-            className="flex items-center gap-2 border border-[#e4dcdd] text-[#856669] px-5 py-3 rounded-2xl font-bold text-sm hover:bg-[#f8f6f6] active:scale-95 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 border border-[#e4dcdd] text-[#856669] px-4 md:px-5 py-2.5 md:py-3 rounded-2xl font-bold text-xs md:text-sm hover:bg-[#f8f6f6] active:scale-95 transition-all disabled:opacity-50 flex-1 sm:flex-none justify-center"
           >
             {cleaningTemp ? <Loader2 className="animate-spin" size={18} /> : null}
             Temp Cleanup
@@ -317,7 +318,7 @@ export default function GalleryManagementPage() {
             <button
               onClick={commitChanges}
               disabled={saving}
-              className="flex items-center gap-2 bg-[#DB5461] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#DB5461]/20 disabled:opacity-50"
+              className="flex items-center gap-2 bg-[#DB5461] text-white px-4 md:px-6 py-2.5 md:py-3 rounded-2xl font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#DB5461]/20 disabled:opacity-50 flex-1 sm:flex-none justify-center"
             >
               {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               Complete Registration
@@ -325,7 +326,7 @@ export default function GalleryManagementPage() {
           )}
           <button
             onClick={() => setIsUploadModalOpen(true)}
-            className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-2xl font-bold text-sm hover:scale-105 active:scale-95 transition-all"
+            className="flex items-center gap-2 bg-black text-white px-4 md:px-6 py-2.5 md:py-3 rounded-2xl font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all w-full sm:w-auto justify-center"
           >
             <Plus size={18} />
             Add Images (Stage)
@@ -423,6 +424,46 @@ export default function GalleryManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 md:bottom-10 right-6 md:right-10 z-[100] flex items-center gap-3 pointer-events-none">
+        <AnimatePresence mode="popLayout">
+          {hasChanges && !isUploadModalOpen && (
+            <motion.button
+              key="complete-btn"
+              initial={{ opacity: 0, scale: 0.8, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 20 }}
+              whileHover={{ scale: 1.05, backgroundColor: "#e26673" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={commitChanges}
+              disabled={saving}
+              className="pointer-events-auto flex items-center gap-2 bg-[#DB5461] text-white px-4 md:px-6 py-3 md:py-4 rounded-full shadow-[0_20px_50px_rgba(219,84,97,0.3)] border border-white/10 backdrop-blur-md transition-all disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+              <span className="font-bold text-xs md:text-sm tracking-tight pr-1">등록 완료</span>
+            </motion.button>
+          )}
+
+          {!isUploadModalOpen && (
+            <motion.button
+              key="add-btn"
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsUploadModalOpen(true)}
+              className="pointer-events-auto flex items-center gap-2 md:gap-3 bg-[#171212] text-white px-4 md:px-6 py-3 md:py-4 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10 backdrop-blur-md transition-all group hover:bg-black"
+            >
+              <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#DB5461] text-white group-hover:rotate-90 transition-transform duration-300">
+                <Plus size={18} />
+              </div>
+              <span className="font-bold text-xs md:text-sm tracking-tight pr-1 md:pr-2">이미지 등록</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -551,7 +592,7 @@ function GalleryCard({
         <div className="w-full h-full bg-black">
           {item.imageUrl ? (
             <img
-              src={item.imageUrl}
+              src={getThumbnailUrl(item.imageUrl)}
               alt=""
               className="w-full h-full object-cover select-none pointer-events-none"
             />
@@ -562,7 +603,7 @@ function GalleryCard({
         </div>
       ) : (
         <img
-          src={item.imageUrl}
+          src={getThumbnailUrl(item.imageUrl)}
           alt=""
           className="w-full h-full object-cover select-none pointer-events-none"
         />

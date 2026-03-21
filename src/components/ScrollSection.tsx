@@ -52,6 +52,12 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
           src={content?.imageUrl || defaultImage}
           alt={imageAlt}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            if (target.src !== defaultImage) {
+              target.src = defaultImage;
+            }
+          }}
         />
       </motion.div>
 

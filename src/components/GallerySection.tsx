@@ -2,6 +2,7 @@
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { getThumbnailUrl } from "@/lib/cloudinary";
 
 const GallerySection = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -78,15 +79,23 @@ const GallerySection = () => {
                   playsInline
                   loop
                   autoPlay
-                  poster={item.imageUrl}
+                  poster={getThumbnailUrl(item.imageUrl)}
                 />
               ) : (
                 <img
-                  src={item.imageUrl}
+                  src={getThumbnailUrl(item.imageUrl)}
                   alt=""
                   className={`w-full h-auto object-cover grayscale-30 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out ${
                     i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
                   }`}
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    const fallback = "/images/lovable/hero.jpg";
+                    if (target.src !== fallback) {
+                      target.src = fallback;
+                    }
+                  }}
                 />
               )}
               {isVideo(item) && (

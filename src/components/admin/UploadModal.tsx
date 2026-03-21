@@ -87,21 +87,21 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-[95%] md:max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="px-8 py-6 border-b border-[#f4f1f1] flex items-center justify-between">
-          <h3 className="text-xl font-bold text-[#171212]">이미지 추가/관리</h3>
+        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-[#f4f1f1] flex items-center justify-between">
+          <h3 className="text-lg md:text-xl font-bold text-[#171212]">이미지 추가/관리</h3>
           <button onClick={onClose} className="p-2 hover:bg-[#f8f6f6] rounded-full transition-colors text-[#856669]">
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-8 space-y-6 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="p-5 md:p-8 space-y-4 md:space-y-6 flex-1 overflow-y-auto overflow-x-hidden">
           {/* Info Area */}
-          <div className="text-sm">
+          <div className="text-xs md:text-sm">
             <div className="text-[#856669] leading-relaxed">
-              현재 <span className="text-[#DB5461] font-bold">{files.length}장의 이미지</span>가 대기 중입니다.<br/>
+              현재 <span className="text-[#DB5461] font-bold">{files.length}장의 이미지</span>가 대기 중입니다.<br className="hidden md:block"/>
               파일을 아래 영역에 끌어서 놓거나 클릭하여 추가해주세요.
             </div>
           </div>
@@ -112,14 +112,14 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
             onDragLeave={() => setIsOver(false)}
             onDrop={onDrop}
             className={cn(
-              "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-all duration-300",
+              "border-2 border-dashed rounded-xl p-6 md:p-8 flex flex-col items-center justify-center transition-all duration-300",
               isOver 
                 ? "border-[#DB5461] bg-[#DB5461]/5" 
                 : "border-[#e4dcdd] bg-[#f8f6f6]/30 hover:border-[#DB5461]/40"
             )}
           >
             <Upload size={24} className="text-[#DB5461] mb-2" />
-            <p className="text-sm font-bold text-[#171212]">이미지를 여기에 드래그하거나 클릭하여 파일 선택</p>
+            <p className="text-xs md:text-sm font-bold text-[#171212] text-center">이미지를 여기에 드래그하거나 <br className="md:hidden"/>클릭하여 파일 선택</p>
             <input 
               type="file" multiple className="hidden" id="browse-files" accept="image/*,video/mp4"
               onChange={(e) => handleFiles(Array.from(e.target.files || []))}
@@ -128,7 +128,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
 
           {/* Thumbnail Grid Previews */}
           {previews.length > 0 && (
-            <div className="grid grid-cols-5 gap-3 pt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-4">
               {previews.map((preview, i) => (
                 <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-[#e4dcdd] group group-hover:shadow-lg transition-all">
                   {preview.type === "video" ? (
@@ -163,17 +163,17 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
         </div>
 
         {/* Footer Actions */}
-        <div className="px-8 py-6 border-t border-[#f4f1f1] flex justify-center gap-3 bg-[#fdfdfd]">
+        <div className="px-5 md:px-8 py-4 md:py-6 border-t border-[#f4f1f1] flex justify-center gap-3 bg-[#fdfdfd]">
           <button 
             onClick={onClose}
-            className="px-10 py-3 rounded-xl border border-[#e4dcdd] font-bold text-[#856669] hover:bg-[#f8f6f6] transition-colors"
+            className="flex-1 md:flex-none md:px-10 py-3 rounded-xl border border-[#e4dcdd] font-bold text-[#856669] hover:bg-[#f8f6f6] transition-colors text-sm md:text-base"
           >
             취소
           </button>
           <button
             onClick={handleUpload}
             disabled={uploading || files.length === 0}
-            className="px-12 py-3 bg-[#00B96B] text-white rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#00B96B]/20 flex items-center gap-2 disabled:opacity-50 disabled:grayscale"
+            className="flex-[2] md:flex-none md:px-12 py-3 bg-[#00B96B] text-white rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#00B96B]/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale text-sm md:text-base"
           >
             {uploading ? <Loader2 className="animate-spin" size={18} /> : null}
             등록
