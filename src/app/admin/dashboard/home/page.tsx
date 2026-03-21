@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Save, Image as ImageIcon, Type, Layout, Coffee, Bed, Tent, Compass, Plus } from "lucide-react";
+import { uploadToCloudinary } from "@/lib/upload";
 
 const SECTIONS = [
   { id: "hero", name: "Hero Section", icon: Layout },
@@ -57,20 +58,10 @@ export default function HomeManagementPage() {
   const handleImageUpload = async (section: string, file: File) => {
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "staynamcheon/home");
-
-      const uploadRes = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-      
-      if (!uploadRes.ok) throw new Error("Upload failed");
-      
-      const { url } = await uploadRes.json();
-      await handleUpdate(section, "imageUrl", url);
+      const result = await uploadToCloudinary(file, "staynamcheon/home");
+      await handleUpdate(section, "imageUrl", result.secure_url);
     } catch (err) {
+      console.error(err);
       alert("Error uploading image");
     } finally {
       setSaving(false);

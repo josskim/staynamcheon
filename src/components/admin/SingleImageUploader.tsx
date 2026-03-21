@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Image as ImageIcon, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadToCloudinary } from "@/lib/upload";
 
 interface SingleImageUploaderProps {
   currentImageUrl?: string;
@@ -25,20 +26,10 @@ export default function SingleImageUploader({
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "staynamcheon/single");
-
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-      
-      const { url } = await res.json();
-      onUpload(url);
+      const result = await uploadToCloudinary(file, "staynamcheon/single");
+      onUpload(result.secure_url);
     } catch (error) {
+      console.error(error);
       alert("Failed to upload image");
     } finally {
       setUploading(false);

@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { X, Upload, Play, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { uploadToCloudinary } from "@/lib/upload";
 
 interface UploadModalProps {
   onClose: () => void;
@@ -48,20 +49,12 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
     try {
       const uploadedItems = [];
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("folder", "staynamcheon/temp");
-        
-        const uploadRes = await fetch("/api/admin/upload", {
-          method: "POST",
-          body: formData
-        });
-        const { url, publicId, public_id, posterUrl } = await uploadRes.json();
+        const result = await uploadToCloudinary(file, "staynamcheon/temp");
         
         uploadedItems.push({
-          url,
-          publicId: publicId || public_id,
-          posterUrl,
+          url: result.secure_url,
+          publicId: result.public_id,
+          posterUrl: Array.isArray(result?.eager) && result.eager[0]?.secure_url ? result.eager[0].secure_url : undefined,
           type: file.type.startsWith("video") ? "video" : "image"
         });
       }
