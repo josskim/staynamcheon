@@ -257,7 +257,6 @@ export default function PensionManagementPage() {
                         const firstImage = items.length > 0 ? items[0].src : "";
                         updateRoom(idx, { gallery: items, image: firstImage });
                       }}
-                      horizontal
                     />
                   </div>
                 </div>
