@@ -79,9 +79,11 @@ export default async function PensionPage() {
                 name={room.name}
                 description={room.description}
                 image={room.image}
+                gallery={room.gallery}
                 prices={room.prices}
                 index={i} 
               />
+
             ))}
           </div>
         </div>

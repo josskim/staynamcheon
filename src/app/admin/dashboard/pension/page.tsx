@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Layout, Type, Save, Loader2, Plus, Trash2, BedDouble } from "lucide-react";
+import { Layout, Type, Save, Loader2, Plus, Trash2, BedDouble, Image as ImageIcon } from "lucide-react";
 import SingleImageUploader from "@/components/admin/SingleImageUploader";
 import MultiImageUploader, { MultiImageItem } from "@/components/admin/MultiImageUploader";
 
@@ -37,17 +37,26 @@ export default function PensionManagementPage() {
           imageUrl: getVal("hero", "imageUrl", "/images/hero.png")
         });
         
-        setRooms(getJson("rooms", "list", [
+        const rawRooms = getJson("rooms", "list", [
           {
             name: "2F Room 201",
             description: "2 Rooms — Spacious suite with mountain views and modern amenities.",
             image: "/images/lovable/pension.jpg",
+            gallery: [],
             prices: [
               { price: "300,000 KRW", label: "Off-season Weekdays (Mon–Thu)" },
               { price: "400,000 KRW", label: "Peak Season (Jul 15 – Aug 30)" }
             ]
           }
-        ]));
+        ]);
+        
+        setRooms(rawRooms.map((r: any) => ({
+          ...r,
+          gallery: r.gallery && r.gallery.length > 0 
+            ? r.gallery 
+            : (r.image ? [{ id: Math.random().toString(36).substring(7), src: r.image }] : [])
+        })));
+
 
         const rawGallery = getJson("gallery", "images", [
           { src: "/images/lovable/gallery1.jpg", alt: "Living space" },
@@ -96,9 +105,10 @@ export default function PensionManagementPage() {
   };
 
   const addRoom = () => {
-    setRooms([...rooms, { name: "New Room", description: "", image: "", prices: [] }]);
+    setRooms([...rooms, { name: "New Room", description: "", image: "", gallery: [], prices: [] }]);
     markChanged();
   };
+
 
   const updateRoom = (index: number, updates: any) => {
     const newRooms = [...rooms];
@@ -235,17 +245,25 @@ export default function PensionManagementPage() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#856669] mb-2 block">객실 대표 이미지</label>
-                    <SingleImageUploader 
-                      currentImageUrl={room.image}
-                      onUpload={(url) => updateRoom(idx, { image: url })}
-                      label="객실 이미지 업로드"
+                  <div className="lg:col-span-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#856669] mb-4 block flex items-center gap-2">
+                      <ImageIcon size={14} /> 객실 이미지 갤러리 
+                      <span className="text-xs font-normal text-muted-foreground normal-case tracking-normal ml-2">첫 번째 이미지가 대표 썸네일로 사용됩니다.</span>
+                    </label>
+                    <MultiImageUploader 
+                      items={room.gallery || []}
+                      onChange={(items) => {
+                        // First image synced to 'image' for backwards compatibility
+                        const firstImage = items.length > 0 ? items[0].src : "";
+                        updateRoom(idx, { gallery: items, image: firstImage });
+                      }}
+                      horizontal
                     />
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-[#e4dcdd]">
+
                   <div className="flex justify-between items-center mb-4">
                     <label className="text-xs font-bold uppercase tracking-widest text-[#856669] block">객실 요금 (Prices)</label>
                     <button onClick={() => addPrice(idx)} className="text-xs font-bold text-[#DB5461] flex items-center gap-1 hover:underline">
