@@ -93,29 +93,33 @@ export default function HomeManagementPage() {
             </div>
             
             <div className="p-8 flex-1 space-y-8">
-              {/* Image Preview & Upload */}
+              {/* Image/Video Preview & Upload */}
               <div className="space-y-4">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#856669] block">Background Image</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-[#856669] block">Background Media (Image or MP4)</label>
                 <div className="relative aspect-video rounded-2xl overflow-hidden border border-[#e4dcdd] bg-[#f8f6f6] group">
-                  <img 
-                    src={content.find(c => c.section === sec.id && c.key === "imageUrl")?.value || "/images/lovable/hero.jpg"} 
-                    alt={sec.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {(() => {
+                    const url = content.find(c => c.section === sec.id && c.key === "imageUrl")?.value || "/images/lovable/hero.jpg";
+                    const isVid = url.endsWith(".mp4") || url.includes("/video/upload/");
+                    if (isVid) {
+                      return <video src={url} autoPlay loop muted playsInline className="w-full h-full object-cover" />;
+                    }
+                    return <img src={url} alt={sec.name} className="w-full h-full object-cover" />;
+                  })()}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+
                     <button 
                       onClick={() => document.getElementById(`upload-${sec.id}`)?.click()}
                       className="bg-white text-[#171212] px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
                     >
                       <ImageIcon size={16} />
-                      Change Image
+                      Change Media
                     </button>
                   </div>
                   <input 
                     type="file" 
                     id={`upload-${sec.id}`}
                     className="hidden" 
-                    accept="image/*"
+                    accept="image/*,video/mp4"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) handleImageUpload(sec.id, file);

@@ -28,21 +28,36 @@ const HeroSection = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
+  const imageUrl = content?.imageUrl || "/images/lovable/hero.jpg";
+  const isVideo = imageUrl.endsWith(".mp4") || imageUrl.includes("/video/upload/");
+
   return (
     <section ref={ref} className="relative h-screen w-full overflow-hidden">
       <motion.div className="absolute inset-0" style={{ y, scale }}>
-        <img
-          src={content?.imageUrl || "/images/lovable/hero.jpg"}
-          alt="Stay Namcheon — a serene pension retreat nestled in the Korean countryside"
-          className="h-full w-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            const defaultHero = "/images/lovable/hero.jpg";
-            if (target.src !== defaultHero) {
-              target.src = defaultHero;
-            }
-          }}
-        />
+        {isVideo ? (
+          <video
+            src={imageUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <img
+            src={imageUrl}
+            alt="Stay Namcheon — a serene pension retreat nestled in the Korean countryside"
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              const defaultHero = "/images/lovable/hero.jpg";
+              if (target.src !== defaultHero) {
+                target.src = defaultHero;
+              }
+            }}
+          />
+        )}
+
         <div className="absolute inset-0 bg-foreground/35" />
       </motion.div>
 
