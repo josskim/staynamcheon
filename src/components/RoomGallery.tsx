@@ -8,7 +8,9 @@ import ScrollReveal from "./ScrollReveal";
 import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
 interface GalleryItem {
-  src: string;
+  id?: string;
+  src?: string;
+  imageUrl?: string;
   alt: string;
 }
 
