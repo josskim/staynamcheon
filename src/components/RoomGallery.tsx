@@ -13,10 +13,21 @@ interface GalleryItem {
 }
 
 interface RoomGalleryProps {
-  images: GalleryItem[];
+  images: (string | GalleryItem)[]; // Allow string or GalleryItem
 }
 
-const RoomGallery = ({ images }: RoomGalleryProps) => {
+const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
+  const images = (rawImages || []).map(img => {
+    if (typeof img === 'string') {
+      return { src: img, alt: "" };
+    }
+    // Ensure either src or imageUrl is present, prioritize src if both exist
+    if (!img.src && img.imageUrl) {
+      return { src: img.imageUrl, alt: img.alt };
+    }
+    return img;
+  });
+
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -35,7 +46,12 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
     }
   }, [lightboxIndex, images.length]);
 
-  const isVideo = (src: string) => src.toLowerCase().endsWith(".mp4");
+  const isVideo = (item: GalleryItem) => {
+    if (typeof item !== "object") return false;
+    const url = item.src || item.imageUrl; // Use src or imageUrl
+    if (typeof url === "string" && (url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes("/video/upload/"))) return true;
+    return false;
+  };
 
   return (
     <>
@@ -59,7 +75,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                   className="group relative mb-8 cursor-pointer overflow-hidden rounded-xl bg-muted"
                   onClick={() => setLightboxIndex(i)}
                 >
-                  {isVideo(item.src) ? (
+                  {isVideo(item) ? (
                     <div className="relative aspect-video">
                       <video
                         src={item.src}
@@ -80,7 +96,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                   ) : (
                     <div className="relative aspect-[3/4] sm:aspect-auto sm:h-[300px] md:h-[400px]">
                       <Image
-                        src={getThumbnailUrl(item.src)}
+                        src={getThumbnailUrl(item.src!)}
                         alt={item.alt}
                         fill
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
@@ -90,7 +106,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-black/10 z-10">
                     <span className="text-white text-sm font-light tracking-[0.3em] uppercase drop-shadow-md">
-                      {isVideo(item.src) ? "Play Video" : "View Image"}
+                      {isVideo(item) ? "Play Video" : "View Image"}
                     </span>
                   </div>
                   {item.alt && (
