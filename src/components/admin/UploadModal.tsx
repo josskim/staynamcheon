@@ -47,7 +47,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
     if (files.length === 0) return;
     setUploading(true);
     try {
-      const folder = "staynamcheon/temp";
+      const folder = "staynamcheon/gallery";
       // 서명을 한 번만 받아옴 (재사용 가능)
       const sigData = await getCloudinarySignature(folder);
       
