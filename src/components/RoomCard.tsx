@@ -26,7 +26,8 @@ interface RoomCardProps {
 const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCardProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const images = gallery && gallery.length > 0 ? gallery : [{ src: image }];
+  const rawImages = gallery && gallery.length > 0 ? gallery : [{ src: image }];
+  const images = rawImages.map(img => typeof img === 'string' ? { src: img } : img);
   const currentImage = images[activeIndex] || images[0];
 
   const isVideo = (src: string) => src?.match(/\.(mp4|webm|ogg|mov)$/i) || src?.includes("/video/upload/");
