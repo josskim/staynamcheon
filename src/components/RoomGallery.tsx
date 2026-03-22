@@ -84,6 +84,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                         alt={item.alt}
                         fill
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                        unoptimized
                       />
                     </div>
                   )}
@@ -156,6 +157,7 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                     fill
                     className="rounded-lg shadow-2xl object-contain"
                     onClick={(e) => e.stopPropagation()}
+                    unoptimized
                   />
                 </div>
               )}

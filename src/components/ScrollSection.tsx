@@ -55,6 +55,7 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
           alt={imageAlt}
           fill
           className="object-cover"
+          unoptimized
         />
       </motion.div>
 

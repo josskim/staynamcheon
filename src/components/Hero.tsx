@@ -37,6 +37,7 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
             fill
             className="object-cover"
             priority
+            unoptimized
           />
         )}
         <div className="absolute inset-0 bg-black/40" />

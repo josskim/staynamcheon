@@ -91,9 +91,10 @@ const GallerySection = () => {
                 )}>
                   <Image
                     src={getThumbnailUrl(item.imageUrl)}
-                    alt=""
+                    alt={item.title || "Gallery image"}
                     fill
-                    className="object-cover grayscale-30 group-hover:grayscale-0"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    unoptimized
                   />
                 </div>
               )}

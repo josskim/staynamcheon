@@ -24,6 +24,7 @@ const ReservationSection = () => {
           alt="Stay Namcheon landscape"
           fill
           className="object-cover"
+          unoptimized
         />
       </motion.div>
 
