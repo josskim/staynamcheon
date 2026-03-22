@@ -36,7 +36,7 @@ const FloatingContact = () => {
           animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, scale: 0.5, y: 50 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed bottom-[124px] right-[40px] md:bottom-[130px] md:right-[150px] z-[9999]"
+          className="fixed bottom-[24px] right-[24px] md:bottom-[40px] md:right-[40px] z-[9999]"
         >
           <motion.a
             href="tel:010-9038-5822"
