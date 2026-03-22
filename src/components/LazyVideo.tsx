@@ -12,6 +12,7 @@ interface LazyVideoProps {
   playsInline?: boolean;
   controls?: boolean;
   preload?: "none" | "metadata" | "auto";
+  eager?: boolean;
   onClick?: (e: React.MouseEvent) => void;
   onMouseOver?: (e: React.MouseEvent<HTMLVideoElement>) => void;
   onMouseOut?: (e: React.MouseEvent<HTMLVideoElement>) => void;
@@ -27,34 +28,42 @@ export default function LazyVideo({
   playsInline = true,
   controls = false,
   preload = "none",
+  eager = false,
   onClick,
   onMouseOver,
   onMouseOut,
 }: LazyVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(eager);
 
+  // Intersection Observer for lazy loading
   useEffect(() => {
+    if (eager) return;
     const video = videoRef.current;
     if (!video) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
-        if (entry.isIntersecting) {
-          if (autoPlay) {
-            video.play().catch(() => {});
-          }
-        } else {
-          video.pause();
-        }
       },
       { threshold: 0.1 }
     );
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, [autoPlay]);
+  }, [eager]);
+
+  // Play/pause based on visibility — runs after src is set in DOM
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isVisible && autoPlay) {
+      video.play().catch(() => {});
+    } else if (!isVisible) {
+      video.pause();
+    }
+  }, [isVisible, autoPlay]);
 
   return (
     <video
@@ -66,7 +75,7 @@ export default function LazyVideo({
       loop={loop}
       playsInline={playsInline}
       controls={controls}
-      preload={preload}
+      preload={eager ? "auto" : preload}
       onClick={onClick}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}

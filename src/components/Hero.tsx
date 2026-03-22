@@ -30,6 +30,7 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
             muted
             loop
             playsInline
+            eager
           />
         ) : (
           <Image
