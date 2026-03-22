@@ -41,8 +41,9 @@ export function getOptimizeImageUrl(
   if (crop === "fill") transformations.push("g_auto");
 
   const transformationStr = transformations.join(",");
+  const finalTransform = transformationStr ? `${transformationStr}/` : "";
   
-  return `${parts[0]}/upload/${transformationStr}/${parts[1]}`;
+  return `${parts[0]}/upload/${finalTransform}${parts[1]}`;
 }
 
 /**
