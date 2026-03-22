@@ -158,19 +158,19 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="px-4 relative"
             >
-              {isVideo(images[lightboxIndex].src) ? (
+              {lightboxIndex !== null && isVideo(images[lightboxIndex]) ? (
                 <video
-                  src={images[lightboxIndex].src}
+                  src={images[lightboxIndex].src || images[lightboxIndex].imageUrl}
                   className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
                   controls
                   autoPlay
                   playsInline
                   onClick={(e) => e.stopPropagation()}
                 />
-              ) : (
+              ) : lightboxIndex !== null ? (
                 <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
                   <Image
-                    src={getOptimizeImageUrl(images[lightboxIndex].src)}
+                    src={getOptimizeImageUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "")}
                     alt={images[lightboxIndex].alt}
                     fill
                     className="rounded-lg shadow-2xl object-contain"
@@ -178,8 +178,8 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                     unoptimized
                   />
                 </div>
-              )}
-              {images[lightboxIndex].alt && (
+              ) : null}
+              {lightboxIndex !== null && images[lightboxIndex].alt && (
                 <div className="absolute bottom-0 left-4 right-4 p-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-b-lg pointer-events-none">
                   <p className="text-white text-center text-lg drop-shadow-md">
                     {images[lightboxIndex].alt}
