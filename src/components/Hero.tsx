@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getHeroImageUrl } from "@/lib/cloudinary";
+import LazyVideo from "./LazyVideo";
 
 interface HeroProps {
   title: string;
@@ -15,14 +16,14 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
 
   return (
     <section className="relative h-[85vh] w-full overflow-hidden">
-      <motion.div 
+      <motion.div
         initial={{ scale: 1.1 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
         className="absolute inset-0"
       >
         {isVideo ? (
-          <video
+          <LazyVideo
             src={backgroundImage}
             className="h-full w-full object-cover"
             autoPlay
@@ -32,19 +33,19 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
           />
         ) : (
           <Image
-            src={getOptimizeImageUrl(backgroundImage)}
+            src={getHeroImageUrl(backgroundImage)}
             alt={title}
             fill
+            sizes="100vw"
             className="object-cover"
             priority
-            unoptimized
           />
         )}
         <div className="absolute inset-0 bg-black/40" />
       </motion.div>
-      
+
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
@@ -53,7 +54,7 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
           {title}
         </motion.h1>
         {subtitle && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
@@ -63,8 +64,8 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
           </motion.p>
         )}
       </div>
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1.2 }}

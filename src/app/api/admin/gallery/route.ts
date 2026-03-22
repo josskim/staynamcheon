@@ -44,7 +44,11 @@ export async function GET(request: Request) {
       ],
       take: limit ? parseInt(limit) : undefined,
     });
-    return NextResponse.json(items);
+    return NextResponse.json(items, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     return NextResponse.json({ message: "Error fetching gallery items" }, { status: 500 });
   }

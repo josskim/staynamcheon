@@ -1,11 +1,12 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { getThumbnailUrl } from "@/lib/cloudinary";
+import LazyVideo from "./LazyVideo";
 
 const GallerySection = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -22,13 +23,6 @@ const GallerySection = () => {
       })
       .catch(err => console.error("Gallery fetch error:", err));
   }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
 
   // Fallback items if database is empty
   const displayItems = items.length > 0 ? items : [
@@ -75,7 +69,7 @@ const GallerySection = () => {
                 whileHover={{ scale: 0.99, transition: { duration: 0.4 } }}
               >
                 {isVideo(item) ? (
-                  <video
+                  <LazyVideo
                     src={item.videoUrl || item.imageUrl}
                     className={`w-full h-auto object-cover grayscale-30 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out ${
                       i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
@@ -84,7 +78,7 @@ const GallerySection = () => {
                     playsInline
                     loop
                     autoPlay
-                    poster={item.imageUrl ? getThumbnailUrl(item.imageUrl) : ""}
+                    poster={item.imageUrl ? getThumbnailUrl(item.imageUrl, 300) : ""}
                   />
                 ) : (
                   <div className={cn(
@@ -95,8 +89,8 @@ const GallerySection = () => {
                       src={getThumbnailUrl(item.imageUrl)}
                       alt={item.title || "Gallery image"}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      unoptimized
                     />
                   </div>
                 )}

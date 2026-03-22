@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getHeroImageUrl } from "@/lib/cloudinary";
 
 interface ScrollSectionProps {
   id: string;
@@ -51,11 +51,11 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
       {/* Parallax background */}
       <motion.div className="absolute inset-[-15%] w-[130%] h-[130%]" style={{ y }}>
         <Image
-          src={getOptimizeImageUrl(content?.imageUrl || defaultImage)}
+          src={getHeroImageUrl(content?.imageUrl || defaultImage)}
           alt={imageAlt}
           fill
+          sizes="130vw"
           className="object-cover"
-          unoptimized
         />
       </motion.div>
 

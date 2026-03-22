@@ -1,28 +1,28 @@
 /**
  * Function to generate optimized Cloudinary URLs using dynamic transformations.
- * 
+ *
  * @param url Original Cloudinary URL
  * @param options Transformation options
  * @returns Optimized URL string
  */
 export function getOptimizeImageUrl(
-  url: string, 
-  options: { 
-    width?: number; 
-    height?: number; 
-    quality?: number | string; 
+  url: string,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: number | string;
     format?: string;
     crop?: string;
   } = {}
 ) {
   if (!url || !url.includes("cloudinary.com")) return url;
 
-  const { 
-    width, 
-    height, 
-    quality = "auto", 
-    format = "auto", 
-    crop 
+  const {
+    width,
+    height,
+    quality = "auto",
+    format = "auto",
+    crop
   } = options;
 
   // Cloudinary URL format: res.cloudinary.com/cloud_name/image/upload/v12345678/folder/image.jpg
@@ -37,26 +37,50 @@ export function getOptimizeImageUrl(
     transformations.push(`c_${crop}`);
     if (crop === "fill") transformations.push("g_auto");
   } else if (!crop && (width || height)) {
-    // Default to scale if width/height provided but no crop
     transformations.push("c_scale");
   }
-  
+
   if (quality) transformations.push(`q_${quality}`);
   if (format) transformations.push(`f_${format}`);
 
   const transformationStr = transformations.join(",");
   const finalTransform = transformationStr ? `${transformationStr}/` : "";
-  
+
   return `${parts[0]}/upload/${finalTransform}${parts[1]}`;
 }
 
 /**
- * Standard thumbnail transformation for gallery grids
+ * Standard thumbnail transformation for gallery grids.
+ * Uses smaller width for better performance.
  */
-export function getThumbnailUrl(url: string) {
-  return getOptimizeImageUrl(url, { 
-    width: 600, 
-    quality: "auto", 
-    format: "auto" 
+export function getThumbnailUrl(url: string, width: number = 400) {
+  return getOptimizeImageUrl(url, {
+    width,
+    quality: "auto:low",
+    format: "auto"
+  });
+}
+
+/**
+ * Hero/full-width image optimization.
+ * Larger size but still compressed.
+ */
+export function getHeroImageUrl(url: string) {
+  return getOptimizeImageUrl(url, {
+    width: 1600,
+    quality: "auto:good",
+    format: "auto",
+  });
+}
+
+/**
+ * Small thumbnail for navigation strips (96px buttons).
+ */
+export function getMiniThumbnailUrl(url: string) {
+  return getOptimizeImageUrl(url, {
+    width: 150,
+    quality: "auto:low",
+    format: "auto",
+    crop: "fill",
   });
 }

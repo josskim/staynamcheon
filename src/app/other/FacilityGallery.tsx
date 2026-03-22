@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import Image from "next/image";
+import { getThumbnailUrl, getMiniThumbnailUrl } from "@/lib/cloudinary";
+import LazyVideo from "@/components/LazyVideo";
 
-interface Image {
+interface ImageItem {
   src: string;
   alt: string;
 }
 
-export default function FacilityGallery({ images }: { images: Image[] }) {
+export default function FacilityGallery({ images }: { images: ImageItem[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (!images || images.length === 0) {
@@ -19,7 +22,7 @@ export default function FacilityGallery({ images }: { images: Image[] }) {
   const next = () => setCurrentIndex((prev) => (prev + 1) % images.length);
   const prev = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
 
-  const isVideo = (src: string) => src.toLowerCase().endsWith(".mp4");
+  const isVideo = (src: string) => src.toLowerCase().endsWith(".mp4") || src.includes("/video/upload/");
 
   return (
     <div className="relative group">
@@ -34,7 +37,7 @@ export default function FacilityGallery({ images }: { images: Image[] }) {
             className="h-full w-full"
           >
             {isVideo(images[currentIndex].src) ? (
-              <video
+              <LazyVideo
                 src={images[currentIndex].src}
                 className="h-full w-full object-cover"
                 autoPlay
@@ -43,11 +46,15 @@ export default function FacilityGallery({ images }: { images: Image[] }) {
                 playsInline
               />
             ) : (
-              <img
-                src={images[currentIndex].src}
-                alt={images[currentIndex].alt}
-                className="h-full w-full object-cover"
-              />
+              <div className="relative h-full w-full">
+                <Image
+                  src={getThumbnailUrl(images[currentIndex].src, 800)}
+                  alt={images[currentIndex].alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
@@ -75,17 +82,23 @@ export default function FacilityGallery({ images }: { images: Image[] }) {
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`w-16 aspect-square rounded-md overflow-hidden border-2 shrink-0 transition-all ${
+            className={`relative w-16 aspect-square rounded-md overflow-hidden border-2 shrink-0 transition-all ${
               idx === currentIndex ? "border-secondary opacity-100 scale-105" : "border-transparent opacity-50 hover:opacity-100"
             }`}
           >
             {isVideo(img.src) ? (
               <div className="h-full w-full bg-muted flex items-center justify-center relative">
-                <video src={img.src} className="h-full w-full object-cover opacity-50" />
+                <video src={img.src} className="h-full w-full object-cover opacity-50" preload="none" />
                 <Maximize2 size={12} className="absolute text-white" />
               </div>
             ) : (
-              <img src={img.src} alt="" className="h-full w-full object-cover" />
+              <Image
+                src={getMiniThumbnailUrl(img.src)}
+                alt=""
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
             )}
           </button>
         ))}

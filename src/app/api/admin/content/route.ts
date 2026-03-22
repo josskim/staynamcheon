@@ -16,7 +16,11 @@ export async function GET(request: Request) {
     const contents = await prisma.stayPageContent.findMany({
       where,
     });
-    return NextResponse.json(contents);
+    return NextResponse.json(contents, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     return NextResponse.json({ message: "Error fetching content" }, { status: 500 });
   }

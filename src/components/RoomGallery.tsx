@@ -15,7 +15,7 @@ interface GalleryItem {
 }
 
 interface RoomGalleryProps {
-  images: (string | GalleryItem)[]; // Allow string or GalleryItem
+  images: (string | GalleryItem)[];
 }
 
 const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
@@ -23,7 +23,6 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
     if (typeof img === 'string') {
       return { src: img, alt: "" };
     }
-    // Ensure either src or imageUrl is present, prioritize src if both exist
     if (!img.src && img.imageUrl) {
       return { src: img.imageUrl, alt: img.alt };
     }
@@ -50,7 +49,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
 
   const isVideo = (item: GalleryItem) => {
     if (typeof item !== "object") return false;
-    const url = item.src || item.imageUrl; // Use src or imageUrl
+    const url = item.src || item.imageUrl;
     if (typeof url === "string" && (url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes("/video/upload/"))) return true;
     return false;
   };
@@ -69,7 +68,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
               </p>
             </div>
           </ScrollReveal>
-          
+
           <div className="columns-1 gap-8 sm:columns-2 lg:columns-3">
             {images.map((item, i) => (
               <ScrollReveal key={i} delay={i % 3 * 0.1}>
@@ -85,6 +84,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                         muted
                         playsInline
                         loop
+                        preload="none"
                         onMouseOver={(e) => e.currentTarget.play()}
                         onMouseOut={(e) => {
                           e.currentTarget.pause();
@@ -101,8 +101,8 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                         src={getThumbnailUrl(item.src!)}
                         alt={item.alt}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                        unoptimized
                       />
                     </div>
                   )}
@@ -151,7 +151,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
             >
               ‹
             </button>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -170,12 +170,12 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
               ) : lightboxIndex !== null ? (
                 <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
                   <Image
-                    src={getOptimizeImageUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "")}
+                    src={getOptimizeImageUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "", { width: 1600 })}
                     alt={images[lightboxIndex].alt}
                     fill
+                    sizes="90vw"
                     className="rounded-lg shadow-2xl object-contain"
                     onClick={(e) => e.stopPropagation()}
-                    unoptimized
                   />
                 </div>
               ) : null}

@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, PlayCircle, Share2, X, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ScrollReveal from "@/components/ScrollReveal";
+import Image from "next/image";
+import { getThumbnailUrl, getMiniThumbnailUrl } from "@/lib/cloudinary";
+import LazyVideo from "@/components/LazyVideo";
 
 type GalleryItem = {
   id: string;
@@ -238,11 +241,11 @@ export default function GalleryPage() {
                 >
                   {item.type === "video" ? (
                     <div className="relative h-full w-full">
-                      <video src={item.src} poster={item.poster} className="h-full w-full object-cover" autoPlay muted loop playsInline />
+                      <LazyVideo src={item.src} poster={item.poster} className="h-full w-full object-cover" autoPlay muted loop playsInline />
                     </div>
                   ) : (
                     <div className="relative h-full w-full">
-                      <img src={item.src} alt={item.alt} className="h-full w-full object-cover" />
+                      <Image src={getThumbnailUrl(item.src, 800)} alt={item.alt || ""} fill sizes="60vw" className="object-cover" />
                     </div>
                   )}
                 </motion.div>
@@ -289,13 +292,15 @@ export default function GalleryPage() {
                 >
                   {item.type === "video" ? (
                     <div className="relative h-full w-full">
-                      <video src={item.src} poster={item.poster} className="h-full w-full object-cover" />
+                      <video src={item.src} poster={item.poster} className="h-full w-full object-cover" preload="none" />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                         <PlayCircle size={12} className="text-white/80" />
                       </div>
                     </div>
                   ) : (
-                    <img src={item.src} alt="" className="h-full w-full object-cover" />
+                    <div className="relative h-full w-full">
+                      <Image src={getMiniThumbnailUrl(item.src)} alt="" fill sizes="112px" className="object-cover" />
+                    </div>
                   )}
                 </button>
               );
@@ -325,7 +330,7 @@ export default function GalleryPage() {
         </ScrollReveal>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-          {[...displayItems, ...displayItems].map((item, i) => (
+          {displayItems.map((item, i) => (
             <ScrollReveal key={`${item.id}-${i}`} delay={i % 4 * 0.1}>
               <div
                 className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm shadow-xl hover:border-white/15 transition-colors"
@@ -340,6 +345,7 @@ export default function GalleryPage() {
                       muted
                       playsInline
                       loop
+                      preload="none"
                       onMouseOver={(e) => e.currentTarget.play()}
                       onMouseOut={(e) => {
                         e.currentTarget.pause();
@@ -352,11 +358,12 @@ export default function GalleryPage() {
                   </div>
                 ) : (
                   <div className="relative aspect-[4/5] overflow-hidden">
-                    <img
-                      src={item.src}
-                      alt={item.alt}
-                      className="h-full w-full object-cover opacity-80 transition-all duration-700 group-hover:opacity-100 group-hover:scale-110"
-                      loading="lazy"
+                    <Image
+                      src={getThumbnailUrl(item.src)}
+                      alt={item.alt || ""}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover opacity-80 transition-all duration-700 group-hover:opacity-100 group-hover:scale-110"
                     />
                   </div>
                 )}
@@ -405,7 +412,13 @@ export default function GalleryPage() {
               {selectedItem.type === "video" ? (
                 <video src={selectedItem.src} poster={selectedItem.poster} className="h-full w-full object-contain" autoPlay controls />
               ) : (
-                <img src={selectedItem.src} alt={selectedItem.alt} className="h-full w-full object-contain" />
+                <Image
+                  src={getThumbnailUrl(selectedItem.src, 1200)}
+                  alt={selectedItem.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  className="object-contain"
+                />
               )}
             </motion.div>
           </motion.div>

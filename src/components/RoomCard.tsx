@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import ScrollReveal from "./ScrollReveal";
-import { ChevronLeft, ChevronRight, X, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getMiniThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
+import LazyVideo from "./LazyVideo";
 
 
 interface PriceItem {
@@ -52,12 +53,12 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
 
     <ScrollReveal delay={index * 0.1}>
       <div className="card-border rounded-lg overflow-hidden bg-card group">
-        <div 
+        <div
           className="image-hover aspect-[21/9] md:aspect-[3/1] relative cursor-pointer"
           onClick={() => setIsLightboxOpen(true)}
         >
           {currentImage.type === "video" || isVideo(currentImage.src) ? (
-            <video
+            <LazyVideo
               src={currentImage.src}
               className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
               autoPlay
@@ -67,11 +68,11 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
             />
           ) : (
             <Image
-              src={getOptimizeImageUrl(currentImage.src)}
+              src={getOptimizeImageUrl(currentImage.src, { width: 1200 })}
               alt={name}
               fill
+              sizes="(max-width: 768px) 100vw, 1200px"
               className="object-cover transition-transform duration-1000 group-hover:scale-105"
-              unoptimized
             />
           )}
 
@@ -118,20 +119,20 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
         {images.length > 1 && (
           <div className="flex gap-3 p-4 overflow-x-auto bg-muted/30 border-b border-border hide-scrollbar">
             {images.map((img, idx) => (
-              <button 
-                key={idx} 
+              <button
+                key={idx}
                 onClick={() => setActiveIndex(idx)}
                 className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${idx === activeIndex ? "border-foreground scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}`}
               >
                 {img.type === "video" || img.src?.match(/\.(mp4|webm|ogg|mov)$/i) || img.src?.includes("/video/upload/") ? (
-                  <video src={img.src} className="w-full h-full object-cover" />
+                  <video src={img.src} className="w-full h-full object-cover" preload="none" />
                 ) : (
-                  <Image 
-                    src={getThumbnailUrl(img.src)} 
-                    alt={`Thumbnail ${idx + 1}`} 
+                  <Image
+                    src={getMiniThumbnailUrl(img.src)}
+                    alt={`Thumbnail ${idx + 1}`}
                     fill
+                    sizes="96px"
                     className="object-cover"
-                    unoptimized
                   />
                 )}
               </button>
@@ -208,7 +209,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               </>
             )}
 
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -227,9 +228,10 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               ) : (
                 <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
                   <Image
-                    src={getOptimizeImageUrl(currentImage.src)}
+                    src={getOptimizeImageUrl(currentImage.src, { width: 1600 })}
                     alt={currentImage.alt || name}
                     fill
+                    sizes="90vw"
                     className="rounded-lg shadow-2xl object-contain"
                     onClick={(e) => e.stopPropagation()}
                   />

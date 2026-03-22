@@ -3,7 +3,8 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getHeroImageUrl } from "@/lib/cloudinary";
+import LazyVideo from "./LazyVideo";
 
 const HeroSection = () => {
   const [content, setContent] = useState<any>(null);
@@ -37,7 +38,7 @@ const HeroSection = () => {
     <section ref={ref} className="relative h-screen w-full overflow-hidden">
       <motion.div className="absolute inset-0" style={{ y, scale }}>
         {isVideo ? (
-          <video
+          <LazyVideo
             src={imageUrl}
             autoPlay
             loop
@@ -47,12 +48,12 @@ const HeroSection = () => {
           />
         ) : (
           <Image
-            src={getOptimizeImageUrl(imageUrl)}
+            src={getHeroImageUrl(imageUrl)}
             alt="Stay Namcheon — a serene pension retreat nestled in the Korean countryside"
             fill
+            sizes="100vw"
             className="object-cover"
             priority
-            unoptimized
           />
         )}
 
