@@ -167,6 +167,8 @@ export default function ReservationManagementPage() {
               <SingleImageUploader 
                 currentImageUrl={hero.imageUrl}
                 onUpload={(url) => { setHero({...hero, imageUrl: url}); markChanged(); }}
+                acceptVideo={true}
+                label="이미지 또는 영상 업로드"
               />
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { X, Upload, Play, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { uploadToCloudinary } from "@/lib/upload";
+import { getCloudinarySignature, uploadToCloudinaryWithSignature } from "@/lib/upload";
 
 interface UploadModalProps {
   onClose: () => void;
@@ -47,20 +47,42 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
     if (files.length === 0) return;
     setUploading(true);
     try {
-      const uploadedItems = [];
-      for (const file of files) {
-        const result = await uploadToCloudinary(file, "staynamcheon/temp");
-        
-        uploadedItems.push({
-          url: result.secure_url,
-          publicId: result.public_id,
-          posterUrl: Array.isArray(result?.eager) && result.eager[0]?.secure_url ? result.eager[0].secure_url : undefined,
-          type: file.type.startsWith("video") ? "video" : "image"
-        });
+      const folder = "staynamcheon/temp";
+      // 서명을 한 번만 받아옴 (재사용 가능)
+      const sigData = await getCloudinarySignature(folder);
+      
+      const uploadedItems: any[] = [];
+      const errors: any[] = [];
+      
+      // Promise.all을 통해 동시 업로드 수행
+      await Promise.all(
+        files.map(async (file) => {
+          try {
+            const result = await uploadToCloudinaryWithSignature(file, sigData);
+            uploadedItems.push({
+              url: result.secure_url,
+              publicId: result.public_id,
+              posterUrl: Array.isArray(result?.eager) && result.eager[0]?.secure_url ? result.eager[0].secure_url : undefined,
+              type: file.type.startsWith("video") ? "video" : "image"
+            });
+          } catch (e) {
+            console.error("File upload failed:", file.name, e);
+            errors.push(file.name);
+          }
+        })
+      );
+
+      // 부분 성공하더라도 UI 업데이트
+      if (uploadedItems.length > 0) {
+        onSuccess(uploadedItems);
       }
-      onSuccess(uploadedItems);
+      
+      if (errors.length > 0) {
+        alert(`${errors.length}개의 파일 업로드에 실패했습니다.\n(${errors.join(", ")})`);
+      }
     } catch (error) {
-      alert("Failed to upload some files");
+      console.error("Upload preparation failed:", error);
+      alert("업로드 과정 중 오류가 발생했습니다.");
     } finally {
       setUploading(false);
     }

@@ -4,12 +4,21 @@ import {
   PublicIcon,
 } from "./Icons";
 import { LoginForm } from "./LoginForm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "StayNamcheon Admin Login",
 };
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
+  const cookieStore = await cookies();
+  const adminSession = cookieStore.get("admin_session");
+
+  if (adminSession?.value) {
+    redirect("/admin/dashboard");
+  }
+
   return (
     <div className="bg-[#f8f6f6] dark:bg-[#201214] text-[#171212] dark:text-white transition-colors duration-300 min-h-screen">
       <div className="flex min-h-screen w-full flex-col lg:flex-row overflow-hidden">

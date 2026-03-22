@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Image as ImageIcon, Type, Layout, Coffee, Bed, Tent, Compass, Plus } from "lucide-react";
+import { Save, Image as ImageIcon, Type, Layout, Coffee, Bed, Tent, Compass, Plus, Phone } from "lucide-react";
 import { uploadToCloudinary } from "@/lib/upload";
 
 const SECTIONS = [
@@ -172,6 +172,40 @@ export default function HomeManagementPage() {
             </div>
           </section>
         ))}
+
+        {/* Floating Contact Button */}
+        <section className="bg-white rounded-3xl border border-[#e4dcdd] overflow-hidden shadow-sm flex flex-col xl:col-span-2">
+            <div className="p-8 border-b border-[#f4f1f1] flex items-center justify-between bg-[#f8f6f6]/30">
+              <h3 className="font-bold text-[#171212] flex items-center gap-2">
+                <Phone size={18} className="text-[#DB5461]" />
+                우측 하단 예약문의 플로팅 버튼
+              </h3>
+            </div>
+            
+            <div className="p-8 flex-1 space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">첫 번째 줄 (예: 예약문의 010-9038-5822)</label>
+                <input 
+                  type="text" 
+                  placeholder="예약문의 010-9038-5822"
+                  defaultValue={content.find(c => c.section === "floating" && c.key === "line1")?.value || ""}
+                  onBlur={(e) => handleUpdate("floating", "line1", e.target.value)}
+                  className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl px-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">두 번째 줄 (추가 안내문, 예: 제2야수교 면회객은 별도문의주세요.)</label>
+                <input 
+                  type="text" 
+                  placeholder="안내문이 필요 없을 경우 비워주세요."
+                  defaultValue={content.find(c => c.section === "floating" && c.key === "line2")?.value || ""}
+                  onBlur={(e) => handleUpdate("floating", "line2", e.target.value)}
+                  className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl px-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors"
+                />
+              </div>
+            </div>
+        </section>
       </div>
     </div>
   );

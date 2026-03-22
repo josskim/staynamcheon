@@ -9,6 +9,8 @@ interface HeroProps {
 }
 
 const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
+  const isVideo = backgroundImage?.match(/\.(mp4|webm|ogg|mov)$/i) || backgroundImage?.includes("/video/upload/");
+
   return (
     <section className="relative h-[85vh] w-full overflow-hidden">
       <motion.div 
@@ -17,11 +19,22 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
         transition={{ duration: 1.5, ease: "easeOut" }}
         className="absolute inset-0"
       >
-        <img
-          src={backgroundImage}
-          alt={title}
-          className="h-full w-full object-cover"
-        />
+        {isVideo ? (
+          <video
+            src={backgroundImage}
+            className="h-full w-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <img
+            src={backgroundImage}
+            alt={title}
+            className="h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-black/40" />
       </motion.div>
       

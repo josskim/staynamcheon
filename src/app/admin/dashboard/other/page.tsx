@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Layout, Save, Loader2, Plus, Trash2, Dumbbell } from "lucide-react";
+import { Layout, Save, Loader2, Plus, Trash2, Dumbbell, Image as ImageIcon } from "lucide-react";
 import SingleImageUploader from "@/components/admin/SingleImageUploader";
 import MultiImageUploader, { MultiImageItem } from "@/components/admin/MultiImageUploader";
 
@@ -234,6 +234,9 @@ export default function OtherManagementPage() {
                           className="w-full bg-[#fdfcfc] border border-[#e4dcdd] rounded-xl px-4 py-2 text-[#171212] focus:border-[#DB5461] outline-none resize-none"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-6">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">이용 수칙 (Rules)</label>
@@ -258,12 +261,14 @@ export default function OtherManagementPage() {
                       </div>
                     </div>
                     
-                    <div className="space-y-4">
-                      <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">시설 갤러리 이미지 (1개 이상 추가 시 슬라이드 노출)</label>
+                    <div className="lg:col-span-2">
+                      <label className="text-xs font-bold uppercase tracking-widest text-[#856669] mb-4 block flex items-center gap-2">
+                        <ImageIcon size={14} className="text-[#DB5461]" /> 시설 갤러리 이미지
+                        <span className="text-xs font-normal text-muted-foreground normal-case tracking-normal ml-2">첫 번째 이미지가 대표 썸네일로 사용됩니다. 1개 이상 추가 시 슬라이드로 노출됩니다.</span>
+                      </label>
                       <MultiImageUploader 
                         items={fac.images}
                         onChange={(items) => updateFacility(id, "images", items)}
-                        horizontal
                       />
                     </div>
                   </div>

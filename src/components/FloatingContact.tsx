@@ -6,10 +6,25 @@ import { useEffect, useState } from "react";
 
 const FloatingContact = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [content, setContent] = useState({ line1: "예약문의 010-9038-5822", line2: "" });
 
   useEffect(() => {
     // Show after a short delay
     const timer = setTimeout(() => setIsVisible(true), 1000);
+    
+    // Fetch custom text
+    fetch("/api/admin/content?page=home")
+      .then(res => res.json())
+      .then(data => {
+        const l1 = data.find((c: any) => c.section === "floating" && c.key === "line1")?.value;
+        const l2 = data.find((c: any) => c.section === "floating" && c.key === "line2")?.value;
+        setContent({ 
+          line1: l1 || "예약문의 010-9038-5822", 
+          line2: l2 || "" 
+        });
+      })
+      .catch(err => console.error(err));
+      
     return () => clearTimeout(timer);
   }, []);
 
@@ -56,8 +71,13 @@ const FloatingContact = () => {
                 <ArrowUpRight size={10} className="text-secondary opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </div>
               <span className="text-sm md:text-lg font-medium tracking-tight text-white whitespace-nowrap">
-                예약문의 <span className="font-bold ml-1 text-secondary">010-9038-5822</span>
+                {content.line1}
               </span>
+              {content.line2 && (
+                <span className="text-xs md:text-sm text-secondary font-bold whitespace-nowrap mt-0.5">
+                  {content.line2}
+                </span>
+              )}
             </div>
 
             {/* Subtle Shine Reflection */}
