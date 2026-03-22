@@ -45,9 +45,9 @@ const Footer = () => {
           © 2026 Stay Namcheon. All rights reserved.
         </p>
         <div className="flex items-center gap-2 group cursor-default">
-          <span className="text-[8px] text-muted-foreground/40 font-light tracking-[0.3em] uppercase transition-all group-hover:text-accent/60">Crafted with precision</span>
-          <span className="text-[10px] font-medium tracking-[0.15em] text-accent/80 group-hover:text-[#DB5461] transition-all">
-            Designed by <span className="font-bold border-b border-[#DB5461]/30">LucasDesign</span>
+          <span className="text-[8px] text-muted-foreground/60 font-medium tracking-[0.2em] uppercase transition-all group-hover:text-accent/80 italic">Crafted with precision</span>
+          <span className="text-[10px] font-medium tracking-[0.15em] text-accent/90 group-hover:text-[#DB5461] transition-all">
+            Designed by <span className="font-bold border-b border-[#DB5461]/40 hover:border-[#DB5461]/80 transition-all">LucasDesign</span>
           </span>
         </div>
       </div>
