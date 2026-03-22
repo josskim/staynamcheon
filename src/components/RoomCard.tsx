@@ -70,6 +70,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               alt={name}
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-105"
+              unoptimized
             />
           )}
 
@@ -129,6 +130,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                     alt={`Thumbnail ${idx + 1}`} 
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 )}
               </button>
