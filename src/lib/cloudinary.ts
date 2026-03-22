@@ -22,7 +22,7 @@ export function getOptimizeImageUrl(
     height, 
     quality = "auto", 
     format = "auto", 
-    crop = "fill" 
+    crop 
   } = options;
 
   // Cloudinary URL format: res.cloudinary.com/cloud_name/image/upload/v12345678/folder/image.jpg
@@ -33,12 +33,16 @@ export function getOptimizeImageUrl(
   const transformations = [];
   if (width) transformations.push(`w_${width}`);
   if (height) transformations.push(`h_${height}`);
-  if (crop && (width || height)) transformations.push(`c_${crop}`);
+  if (crop && (width || height)) {
+    transformations.push(`c_${crop}`);
+    if (crop === "fill") transformations.push("g_auto");
+  } else if (!crop && (width || height)) {
+    // Default to scale if width/height provided but no crop
+    transformations.push("c_scale");
+  }
+  
   if (quality) transformations.push(`q_${quality}`);
   if (format) transformations.push(`f_${format}`);
-  
-  // Add g_auto for better cropping (focus on subject)
-  if (crop === "fill") transformations.push("g_auto");
 
   const transformationStr = transformations.join(",");
   const finalTransform = transformationStr ? `${transformationStr}/` : "";
