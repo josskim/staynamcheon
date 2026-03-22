@@ -4,6 +4,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { getThumbnailUrl } from "@/lib/cloudinary";
 
 const GallerySection = () => {
@@ -84,21 +85,17 @@ const GallerySection = () => {
                   poster={getThumbnailUrl(item.imageUrl)}
                 />
               ) : (
-                <img
-                  src={getThumbnailUrl(item.imageUrl)}
-                  alt=""
-                  className={`w-full h-auto object-cover grayscale-30 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out ${
-                    i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
-                  }`}
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    const fallback = "/images/lovable/hero.jpg";
-                    if (target.src !== fallback) {
-                      target.src = fallback;
-                    }
-                  }}
-                />
+                <div className={cn(
+                  "relative group-hover:scale-105 transition-all duration-1000 ease-in-out",
+                  i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
+                )}>
+                  <Image
+                    src={getThumbnailUrl(item.imageUrl)}
+                    alt=""
+                    fill
+                    className="object-cover grayscale-30 group-hover:grayscale-0"
+                  />
+                </div>
               )}
               {isVideo(item) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-80 group-hover:opacity-100 transition-opacity">

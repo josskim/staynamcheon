@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
+import { getOptimizeImageUrl } from "@/lib/cloudinary";
 
 interface HeroProps {
   title: string;
@@ -29,10 +31,12 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
             playsInline
           />
         ) : (
-          <img
-            src={backgroundImage}
+          <Image
+            src={getOptimizeImageUrl(backgroundImage)}
             alt={title}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            priority
           />
         )}
         <div className="absolute inset-0 bg-black/40" />

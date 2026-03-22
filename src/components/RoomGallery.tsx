@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { X, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import ScrollReveal from "./ScrollReveal";
+import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
 interface GalleryItem {
   src: string;
@@ -76,12 +78,14 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                       </div>
                     </div>
                   ) : (
-                    <img
-                      src={item.src}
-                      alt={item.alt}
-                      className="w-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                      loading="lazy"
-                    />
+                    <div className="relative aspect-[3/4] sm:aspect-auto sm:h-[300px] md:h-[400px]">
+                      <Image
+                        src={getThumbnailUrl(item.src)}
+                        alt={item.alt}
+                        fill
+                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                      />
+                    </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-black/10 z-10">
                     <span className="text-white text-sm font-light tracking-[0.3em] uppercase drop-shadow-md">
@@ -145,12 +149,15 @@ const RoomGallery = ({ images }: RoomGalleryProps) => {
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <img
-                  src={images[lightboxIndex].src}
-                  alt={images[lightboxIndex].alt}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                />
+                <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
+                  <Image
+                    src={getOptimizeImageUrl(images[lightboxIndex].src)}
+                    alt={images[lightboxIndex].alt}
+                    fill
+                    className="rounded-lg shadow-2xl object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
               )}
               {images[lightboxIndex].alt && (
                 <div className="absolute bottom-0 left-4 right-4 p-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-b-lg pointer-events-none">

@@ -2,6 +2,8 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
+import { getOptimizeImageUrl } from "@/lib/cloudinary";
 
 const HeroSection = () => {
   const [content, setContent] = useState<any>(null);
@@ -44,17 +46,12 @@ const HeroSection = () => {
             className="h-full w-full object-cover"
           />
         ) : (
-          <img
-            src={imageUrl}
+          <Image
+            src={getOptimizeImageUrl(imageUrl)}
             alt="Stay Namcheon — a serene pension retreat nestled in the Korean countryside"
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              const defaultHero = "/images/lovable/hero.jpg";
-              if (target.src !== defaultHero) {
-                target.src = defaultHero;
-              }
-            }}
+            fill
+            className="object-cover"
+            priority
           />
         )}
 

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import ScrollReveal from "./ScrollReveal";
 import { ChevronLeft, ChevronRight, X, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
 
 interface PriceItem {
@@ -61,11 +63,11 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               playsInline
             />
           ) : (
-            <img
-              src={currentImage.src}
+            <Image
+              src={getOptimizeImageUrl(currentImage.src)}
               alt={name}
-              className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              loading="lazy"
+              fill
+              className="object-cover transition-transform duration-1000 group-hover:scale-105"
             />
           )}
 
@@ -120,7 +122,12 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                 {img.type === "video" || img.src?.endsWith(".mp4") ? (
                   <video src={img.src} className="w-full h-full object-cover" />
                 ) : (
-                  <img src={img.src} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  <Image 
+                    src={getThumbnailUrl(img.src)} 
+                    alt={`Thumbnail ${idx + 1}`} 
+                    fill
+                    className="object-cover"
+                  />
                 )}
               </button>
             ))}
@@ -213,12 +220,15 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <img
-                  src={currentImage.src}
-                  alt={currentImage.alt || name}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                />
+                <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
+                  <Image
+                    src={getOptimizeImageUrl(currentImage.src)}
+                    alt={currentImage.alt || name}
+                    fill
+                    className="rounded-lg shadow-2xl object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
               )}
               {currentImage.alt && (
                 <div className="absolute bottom-0 left-4 right-4 p-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-b-lg pointer-events-none">

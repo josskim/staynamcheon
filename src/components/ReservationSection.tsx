@@ -3,6 +3,8 @@
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { MapPin, Navigation } from "lucide-react";
+import Image from "next/image";
+import { getOptimizeImageUrl } from "@/lib/cloudinary";
 
 const ReservationSection = () => {
   const ref = useRef(null);
@@ -17,10 +19,11 @@ const ReservationSection = () => {
     <section id="reservation" ref={ref} className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center py-20">
       {/* Parallax background */}
       <motion.div className="absolute inset-[-15%] w-[130%] h-[130%] z-0" style={{ y }}>
-        <img
-          src="/images/lovable/hero.jpg"
+        <Image
+          src={getOptimizeImageUrl("/images/lovable/hero.jpg")}
           alt="Stay Namcheon landscape"
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       </motion.div>
 

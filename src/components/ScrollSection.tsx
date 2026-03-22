@@ -2,6 +2,8 @@
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
+import { getOptimizeImageUrl } from "@/lib/cloudinary";
 
 interface ScrollSectionProps {
   id: string;
@@ -48,16 +50,11 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
     >
       {/* Parallax background */}
       <motion.div className="absolute inset-[-15%] w-[130%] h-[130%]" style={{ y }}>
-        <img
-          src={content?.imageUrl || defaultImage}
+        <Image
+          src={getOptimizeImageUrl(content?.imageUrl || defaultImage)}
           alt={imageAlt}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            if (target.src !== defaultImage) {
-              target.src = defaultImage;
-            }
-          }}
+          fill
+          className="object-cover"
         />
       </motion.div>
 
