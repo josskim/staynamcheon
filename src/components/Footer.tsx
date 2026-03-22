@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border py-16 section-padding">
+    <footer className="border-t border-border pt-16 pb-32 section-padding">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12">
         <div className="flex flex-col gap-4">
           <h3 className="font-display text-2xl tracking-widest text-[#DB5461]">Stay Namcheon</h3>
