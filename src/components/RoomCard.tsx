@@ -53,7 +53,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
           className="image-hover aspect-[21/9] md:aspect-[3/1] relative cursor-pointer"
           onClick={() => setIsLightboxOpen(true)}
         >
-          {currentImage.type === "video" || currentImage.src?.endsWith(".mp4") ? (
+          {currentImage.type === "video" || isVideo(currentImage.src) ? (
             <video
               src={currentImage.src}
               className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -119,7 +119,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                 onClick={() => setActiveIndex(idx)}
                 className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${idx === activeIndex ? "border-foreground scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}`}
               >
-                {img.type === "video" || img.src?.endsWith(".mp4") ? (
+                {img.type === "video" || img.src?.match(/\.(mp4|webm|ogg|mov)$/i) || img.src?.includes("/video/upload/") ? (
                   <video src={img.src} className="w-full h-full object-cover" />
                 ) : (
                   <Image 
@@ -210,7 +210,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="px-4 relative flex items-center justify-center"
             >
-              {currentImage.type === "video" || currentImage.src?.endsWith(".mp4") ? (
+              {currentImage.type === "video" || currentImage.src?.match(/\.(mp4|webm|ogg|mov)$/i) || currentImage.src?.includes("/video/upload/") ? (
                 <video
                   src={currentImage.src}
                   className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"

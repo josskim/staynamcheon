@@ -31,7 +31,7 @@ const HeroSection = () => {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   const imageUrl = content?.imageUrl || "/images/lovable/hero.jpg";
-  const isVideo = imageUrl.endsWith(".mp4") || imageUrl.includes("/video/upload/");
+  const isVideo = imageUrl?.match(/\.(mp4|webm|ogg|mov)$/i) || imageUrl?.includes("/video/upload/");
 
   return (
     <section ref={ref} className="relative h-screen w-full overflow-hidden">
