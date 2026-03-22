@@ -29,6 +29,8 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
   const images = gallery && gallery.length > 0 ? gallery : [{ src: image }];
   const currentImage = images[activeIndex] || images[0];
 
+  const isVideo = (src: string) => src?.match(/\.(mp4|webm|ogg|mov)$/i) || src?.includes("/video/upload/");
+
   useEffect(() => {
     if (isLightboxOpen) {
       document.body.style.overflow = "hidden";
