@@ -205,7 +205,7 @@ export default async function CampnicPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <ScrollReveal direction="right">
               <div className="space-y-8">
-                <h3 className="text-3xl font-semibold tracking-tight">Preparation Guide</h3>
+                <h3 className="text-3xl font-semibold tracking-tight">Preparation Guide(준비물)</h3>
                 <div className="space-y-4">
                   {prepRules.map((rule: string, i: number) => (
                     <div key={i} className="flex items-start gap-3">
@@ -219,7 +219,7 @@ export default async function CampnicPage() {
 
             <ScrollReveal direction="left" delay={0.2}>
               <div className="space-y-8">
-                <h3 className="text-3xl font-semibold tracking-tight">Extra Charges</h3>
+                <h3 className="text-3xl font-semibold tracking-tight">Extra Charges(추가요금)</h3>
                 <div className="bg-muted p-8 rounded-2xl space-y-4">
                   {extraCharges.map((c: any, idx: number) => (
                     <div key={idx} className="flex justify-between">

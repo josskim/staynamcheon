@@ -74,6 +74,7 @@ model StayGalleryItem {
   type        String   @default("image") // "image", "video"
   order       Int      @default(0)
   isVisible   Boolean  @default(true)
+  isMain      Boolean  @default(false)
   category    String?  // e.g., "interior", "exterior", "landscape"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

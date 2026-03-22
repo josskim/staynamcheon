@@ -2,6 +2,8 @@
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { getThumbnailUrl } from "@/lib/cloudinary";
 
 const GallerySection = () => {
@@ -10,7 +12,7 @@ const GallerySection = () => {
   const isInView = useInView(containerRef, { once: true, margin: "-10%" });
 
   useEffect(() => {
-    fetch("/api/admin/gallery?limit=10")
+    fetch("/api/admin/gallery?isMain=true")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -109,6 +111,22 @@ const GallerySection = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             </motion.div>
           ))}
+
+          {/* More Button */}
+          <motion.div
+            className={cn(
+              "break-inside-avoid relative rounded-3xl overflow-hidden cursor-pointer group mb-8 aspect-square",
+              "border border-dashed border-foreground/20 flex flex-col items-center justify-center bg-foreground/5 hover:bg-foreground/10 transition-colors"
+            )}
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: displayItems.length * 0.1 }}
+          >
+            <Link href="/gallery" className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <span className="font-display text-4xl mb-2">More.</span>
+              <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium">View Full Gallery</span>
+            </Link>
+          </motion.div>
         </div>
       </div>
     </section>

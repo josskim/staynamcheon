@@ -119,6 +119,7 @@ export async function POST(request: Request) {
               publicId: newPublicId,
               type: item.type,
               order: item.order,
+              isMain: item.isMain || false,
             }
           });
           committedItems.push(newItem);
@@ -150,6 +151,7 @@ export async function POST(request: Request) {
               publicId: incomingPublicId,
               type: item.type,
               order: item.order,
+              isMain: item.isMain || false,
             }
           });
           committedItems.push(newItem);
@@ -169,14 +171,21 @@ export async function POST(request: Request) {
         // Existing item, just update order
         await prisma.stayGalleryItem.update({
           where: { id: item.id },
-          data: { order: item.order }
+          data: { 
+            order: item.order,
+            isMain: item.isMain
+          }
         });
       }
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gallery commit error:", error);
-    return NextResponse.json({ message: "Error committing gallery changes" }, { status: 500 });
+    return NextResponse.json({ 
+      message: "Error committing gallery changes", 
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    }, { status: 500 });
   }
 }

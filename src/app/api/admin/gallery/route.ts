@@ -33,9 +33,11 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = searchParams.get("limit");
+  const isMain = searchParams.get("isMain");
 
   try {
     const items = await prisma.stayGalleryItem.findMany({
+      where: isMain === "true" ? { isMain: true, isVisible: true } : {},
       orderBy: [
         { order: "asc" },
         { createdAt: "desc" }

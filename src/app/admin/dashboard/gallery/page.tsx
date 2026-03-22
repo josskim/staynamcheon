@@ -39,6 +39,8 @@ interface GalleryItem {
   videoUrl?: string;
   type: "image" | "video";
   order: number;
+  isVisible: boolean; // Added for completeness
+  isMain: boolean;    // New field
   isStaged?: boolean; // New items not yet saved
 }
 
@@ -106,7 +108,11 @@ export default function GalleryManagementPage() {
       const res = await fetch("/api/admin/gallery");
       const data = await res.json();
       if (Array.isArray(data)) {
-        setItems(data);
+        setItems(data.map((item: any) => ({
+          ...item,
+          isVisible: item.isVisible ?? true,
+          isMain: item.isMain ?? false
+        })));
         setSelectedIds(new Set());
         lastSelectedIndexRef.current = null;
       } else {
@@ -145,7 +151,8 @@ export default function GalleryManagementPage() {
         imageUrl: item.imageUrl,
         videoUrl: item.videoUrl,
         type: item.type,
-        order: index + 1
+        order: index + 1,
+        isMain: item.isMain
       }));
 
       const res = await fetch("/api/admin/gallery/commit", {
@@ -281,6 +288,8 @@ export default function GalleryManagementPage() {
       publicId: ni.publicId,
       type: ni.type,
       order: 0,
+      isVisible: true,
+      isMain: false,
       isStaged: true
     }));
     setItems(prev => [...staged, ...prev]); // Prepend new items
@@ -355,6 +364,10 @@ export default function GalleryManagementPage() {
                   onDelete={() => deleteItem(item.id, !!item.isStaged)}
                   isSelected={selectedIds.has(item.id)}
                   onToggleSelect={(shiftKey) => toggleSelect(item.id, index, shiftKey)}
+                  onToggleMain={() => {
+                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, isMain: !i.isMain } : i));
+                    setHasChanges(true);
+                  }}
                   onPreview={() => setPreviewItem(item)}
                 />
               ))}
@@ -474,6 +487,7 @@ function SortableGalleryItem({
   onDelete,
   isSelected,
   onToggleSelect,
+  onToggleMain,
   onPreview,
 }: {
   item: GalleryItem;
@@ -481,6 +495,7 @@ function SortableGalleryItem({
   onDelete: () => void;
   isSelected: boolean;
   onToggleSelect: (shiftKey: boolean) => void;
+  onToggleMain: () => void;
   onPreview: () => void;
 }) {
   const {
@@ -507,6 +522,7 @@ function SortableGalleryItem({
         isOver={isOver}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
+        onToggleMain={onToggleMain}
         onPreview={onPreview}
         dragAttributes={attributes}
         dragListeners={listeners}
@@ -523,6 +539,7 @@ function GalleryCard({
   isOverlay,
   isSelected,
   onToggleSelect,
+  onToggleMain,
   onPreview,
   dragAttributes,
   dragListeners
@@ -534,6 +551,7 @@ function GalleryCard({
   isOverlay?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (shiftKey: boolean) => void;
+  onToggleMain?: () => void;
   onPreview?: () => void;
   dragAttributes?: any;
   dragListeners?: any;
@@ -572,6 +590,27 @@ function GalleryCard({
               <path d="M1 6.5L5.5 11L15 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : null}
+        </button>
+      )}
+      {onToggleMain && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMain();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className={cn(
+            "absolute top-4 right-16 z-20 w-9 h-9 rounded-md border shadow-md flex items-center justify-center transition-all",
+            item.isMain
+              ? "bg-yellow-400 border-yellow-400 text-white opacity-100"
+              : "bg-white/80 border-white text-gray-400 opacity-0 group-hover:opacity-100 hover:text-yellow-500"
+          )}
+          aria-label="Set as Main"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={item.isMain ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
         </button>
       )}
       {onPreview && (
