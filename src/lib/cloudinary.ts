@@ -17,6 +17,10 @@ export function getOptimizeImageUrl(
 ) {
   if (!url || !url.includes("cloudinary.com")) return url;
 
+  // IMPORTANT: The 'temp' folder on this Cloudinary account prevents ALL transformations (404 error).
+  // We must bypass optimization for any image in that folder to ensure they remain visible.
+  if (url.includes("/staynamcheon/temp/")) return url;
+
   const { 
     width, 
     height, 
