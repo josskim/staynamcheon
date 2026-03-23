@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, PlayCircle, Share2, X, Play } from "lucide-r
 import { cn } from "@/lib/utils";
 import ScrollReveal from "@/components/ScrollReveal";
 import Image from "next/image";
-import { getThumbnailUrl, getMiniThumbnailUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
 import LazyVideo from "@/components/LazyVideo";
 
 type GalleryItem = {
@@ -109,6 +109,24 @@ export default function GalleryPage() {
       setCurrentIndex(0);
     }
   }, [currentIndex, displayItems.length]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!selectedItem) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedItem(null);
+      if (e.key === "ArrowRight") {
+        const idx = displayItems.findIndex(i => i.id === selectedItem.id);
+        if (idx >= 0) setSelectedItem(displayItems[(idx + 1) % displayItems.length]);
+      }
+      if (e.key === "ArrowLeft") {
+        const idx = displayItems.findIndex(i => i.id === selectedItem.id);
+        if (idx >= 0) setSelectedItem(displayItems[(idx - 1 + displayItems.length) % displayItems.length]);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [selectedItem, displayItems]);
 
   const scrollThumbToIndex = (index: number) => {
     const container = thumbScrollRef.current;
@@ -233,10 +251,10 @@ export default function GalleryPage() {
                     if (swipe < -100) nextSlide();
                     if (swipe > 100) prevSlide();
                   }}
-                  onClick={() => absPosition === 0 && setSelectedItem(item)}
+                  onClick={() => setSelectedItem(item)}
                   className={cn(
                     "absolute w-[80%] md:w-[60%] aspect-[16/9] rounded-3xl overflow-hidden bg-black/20 shadow-2xl transition-shadow duration-300",
-                    absPosition === 0 ? "cursor-pointer border-2 border-white/15 ring-4 ring-white/[0.06]" : "cursor-grab active:cursor-grabbing"
+                    absPosition === 0 ? "cursor-pointer border-2 border-white/15 ring-4 ring-white/[0.06]" : "cursor-pointer cursor-grab active:cursor-grabbing"
                   )}
                 >
                   {item.type === "video" ? (
@@ -292,7 +310,7 @@ export default function GalleryPage() {
                 >
                   {item.type === "video" ? (
                     <div className="relative h-full w-full">
-                      <video src={item.src} poster={item.poster} className="h-full w-full object-cover" preload="none" />
+                      <video src={getH264VideoUrl(item.src)} poster={item.poster} className="h-full w-full object-cover" preload="none" />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                         <PlayCircle size={12} className="text-white/80" />
                       </div>
@@ -339,7 +357,7 @@ export default function GalleryPage() {
                 {item.type === "video" ? (
                   <div className="relative aspect-[4/5]">
                     <video
-                      src={item.src}
+                      src={getH264VideoUrl(item.src)}
                       poster={item.poster}
                       className="h-full w-full object-cover opacity-80 transition-all duration-700 group-hover:opacity-100 group-hover:scale-110"
                       muted
@@ -410,13 +428,13 @@ export default function GalleryPage() {
               onClick={(e) => e.stopPropagation()}
             >
               {selectedItem.type === "video" ? (
-                <video src={selectedItem.src} poster={selectedItem.poster} className="h-full w-full object-contain" autoPlay controls />
+                <video src={getH264VideoUrl(selectedItem.src)} poster={selectedItem.poster} className="h-full w-full object-contain" autoPlay controls />
               ) : (
                 <Image
-                  src={getThumbnailUrl(selectedItem.src, 1200)}
+                  src={getOptimizeImageUrl(selectedItem.src, { width: 1600, quality: "auto:good", format: "auto" })}
                   alt={selectedItem.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 1200px"
+                  sizes="(max-width: 768px) 100vw, 1600px"
                   className="object-contain"
                 />
               )}

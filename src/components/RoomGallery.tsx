@@ -5,7 +5,7 @@ import { X, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import ScrollReveal from "./ScrollReveal";
-import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
 
 interface GalleryItem {
   id?: string;
@@ -79,7 +79,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                   {isVideo(item) ? (
                     <div className="relative aspect-video">
                       <video
-                        src={item.src}
+                        src={getH264VideoUrl(item.src || "")}
                         className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                         muted
                         playsInline
@@ -98,7 +98,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                   ) : (
                     <div className="relative aspect-[3/4] sm:aspect-auto sm:h-[300px] md:h-[400px]">
                       <Image
-                        src={getThumbnailUrl(item.src!)}
+                        src={getThumbnailUrl(item.src!, 800)}
                         alt={item.alt}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -160,7 +160,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
             >
               {lightboxIndex !== null && isVideo(images[lightboxIndex]) ? (
                 <video
-                  src={images[lightboxIndex].src || images[lightboxIndex].imageUrl}
+                  src={getH264VideoUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "")}
                   className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
                   controls
                   autoPlay
