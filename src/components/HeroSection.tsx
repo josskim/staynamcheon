@@ -1,26 +1,13 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import { getHeroImageUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
-const HeroSection = () => {
-  const [content, setContent] = useState<any>(null);
+const HeroSection = ({ content }: { content?: any }) => {
   const ref = useRef(null);
-
-  useEffect(() => {
-    fetch("/api/admin/content?page=home&section=hero")
-      .then(res => res.json())
-      .then(data => {
-        const heroData: any = {};
-        data.forEach((item: any) => {
-          if (item.section === "hero") heroData[item.key] = item.value;
-        });
-        setContent(heroData);
-      });
-  }, []);
 
   const { scrollYProgress } = useScroll({
     target: ref,

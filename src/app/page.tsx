@@ -20,6 +20,7 @@ export default async function Home() {
     return sectionData;
   };
 
+  const heroContent = getSectionContent("hero");
   const pensionContent = getSectionContent("pension");
   const campnicContent = getSectionContent("campnic");
   const cafeContent = getSectionContent("cafe");
@@ -27,7 +28,7 @@ export default async function Home() {
 
   return (
     <div className="bg-background">
-      <HeroSection />
+      <HeroSection content={heroContent} />
 
       <ScrollSection
         id="pension"
