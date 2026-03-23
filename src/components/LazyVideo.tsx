@@ -71,6 +71,7 @@ export default function LazyVideo({
       src={isVisible ? src : undefined}
       poster={poster}
       className={className}
+      autoPlay={autoPlay && isVisible}
       muted={muted}
       loop={loop}
       playsInline={playsInline}
