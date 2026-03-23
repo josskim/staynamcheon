@@ -53,10 +53,10 @@ export function getOptimizeImageUrl(
  * Standard thumbnail transformation for gallery grids.
  * Uses smaller width for better performance.
  */
-export function getThumbnailUrl(url: string, width: number = 400) {
+export function getThumbnailUrl(url: string, width: number = 800) {
   return getOptimizeImageUrl(url, {
     width,
-    quality: "auto:low",
+    quality: "auto:good",
     format: "auto"
   });
 }
@@ -67,8 +67,8 @@ export function getThumbnailUrl(url: string, width: number = 400) {
  */
 export function getHeroImageUrl(url: string) {
   return getOptimizeImageUrl(url, {
-    width: 1600,
-    quality: "auto:good",
+    width: 2400,
+    quality: "auto:best",
     format: "auto",
   });
 }
@@ -91,8 +91,8 @@ export function getH264VideoUrl(url: string) {
  */
 export function getMiniThumbnailUrl(url: string) {
   return getOptimizeImageUrl(url, {
-    width: 150,
-    quality: "auto:low",
+    width: 200,
+    quality: "auto:good",
     format: "auto",
     crop: "fill",
   });

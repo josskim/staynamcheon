@@ -377,7 +377,7 @@ export default function GalleryPage() {
                 ) : (
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <Image
-                      src={getThumbnailUrl(item.src)}
+                      src={getThumbnailUrl(item.src, 800)}
                       alt={item.alt || ""}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"

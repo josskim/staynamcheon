@@ -78,7 +78,7 @@ const GallerySection = () => {
                     playsInline
                     loop
                     autoPlay
-                    poster={item.imageUrl ? getThumbnailUrl(item.imageUrl, 300) : ""}
+                    poster={item.imageUrl ? getThumbnailUrl(item.imageUrl, 800) : ""}
                   />
                 ) : (
                   <div className={cn(
@@ -86,7 +86,7 @@ const GallerySection = () => {
                     i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
                   )}>
                     <Image
-                      src={getThumbnailUrl(item.imageUrl)}
+                      src={getThumbnailUrl(item.imageUrl, 1000)}
                       alt={item.title || "Gallery image"}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

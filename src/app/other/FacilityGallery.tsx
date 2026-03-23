@@ -48,7 +48,7 @@ export default function FacilityGallery({ images }: { images: ImageItem[] }) {
             ) : (
               <div className="relative h-full w-full">
                 <Image
-                  src={getThumbnailUrl(images[currentIndex].src, 800)}
+                  src={getThumbnailUrl(images[currentIndex].src, 1400)}
                   alt={images[currentIndex].alt}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
