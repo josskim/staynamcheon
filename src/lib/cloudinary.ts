@@ -74,6 +74,19 @@ export function getHeroImageUrl(url: string) {
 }
 
 /**
+ * Cloudinary 비디오 URL을 H.264(vc_h264)로 자동 변환.
+ * HEVC(H.265) 등 일부 브라우저에서 재생 불가한 코덱을 범용 H.264로 변환.
+ */
+export function getH264VideoUrl(url: string) {
+  if (!url || !url.includes("cloudinary.com") || !url.includes("/video/upload/")) return url;
+  // 이미 vc_ 변환이 있으면 그대로
+  if (url.includes("/vc_")) return url;
+  const parts = url.split("/upload/");
+  if (parts.length !== 2) return url;
+  return `${parts[0]}/upload/vc_h264/${parts[1]}`;
+}
+
+/**
  * Small thumbnail for navigation strips (96px buttons).
  */
 export function getMiniThumbnailUrl(url: string) {

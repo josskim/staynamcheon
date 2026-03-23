@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { getH264VideoUrl } from "@/lib/cloudinary";
 
 interface LazyVideoProps {
   src: string;
@@ -35,6 +36,7 @@ export default function LazyVideo({
 }: LazyVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVisible, setIsVisible] = useState(eager);
+  const safeSrc = getH264VideoUrl(src);
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function LazyVideo({
   return (
     <video
       ref={videoRef}
-      src={isVisible ? src : undefined}
+      src={isVisible ? safeSrc : undefined}
       poster={poster}
       className={className}
       autoPlay={autoPlay && isVisible}
