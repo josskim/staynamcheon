@@ -190,10 +190,10 @@ export default function CampnicManagementPage() {
             </h3>
           </div>
           <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <InputField label="Hero Title" value={hero.title} onChange={v => { setHero({ ...hero, title: v }); markChanged(); }} />
-              <InputField label="Hero Subtitle" value={hero.subtitle} onChange={v => { setHero({ ...hero, subtitle: v }); markChanged(); }} />
-            </div>
+              <div className="space-y-6">
+                <InputField label="Hero Title" value={hero.title} onChange={v => { setHero({ ...hero, title: v }); markChanged(); }} />
+                <TextareaField label="Hero Subtitle" value={hero.subtitle} onChange={v => { setHero({ ...hero, subtitle: v }); markChanged(); }} rows={3} />
+              </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-[#856669] mb-2 block">Background Image</label>
               <SingleImageUploader currentImageUrl={hero.imageUrl} onUpload={url => { setHero({ ...hero, imageUrl: url }); markChanged(); }} />

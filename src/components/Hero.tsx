@@ -59,7 +59,7 @@ const Hero = ({ title, subtitle, backgroundImage }: HeroProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
-            className="max-w-xl text-sm font-light uppercase tracking-[0.4em] text-white/90 md:text-base"
+            className="max-w-xl text-sm font-light uppercase tracking-[0.4em] text-white/90 md:text-base whitespace-pre-wrap"
           >
             {subtitle}
           </motion.p>

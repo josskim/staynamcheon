@@ -30,7 +30,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import UploadModal from "@/components/admin/UploadModal";
-import { getThumbnailUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
 interface GalleryItem {
   id: string;
@@ -429,7 +429,7 @@ export default function GalleryManagementPage() {
               />
             ) : (
               <img
-                src={previewItem.imageUrl}
+                src={getOptimizeImageUrl(previewItem.imageUrl, { width: 1600 })}
                 alt=""
                 className="w-full h-full object-contain"
               />

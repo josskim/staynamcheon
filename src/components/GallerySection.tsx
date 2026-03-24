@@ -5,7 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { getThumbnailUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getH264VideoUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
 const GallerySection = () => {
@@ -70,7 +70,7 @@ const GallerySection = () => {
               >
                 {isVideo(item) ? (
                   <LazyVideo
-                    src={item.videoUrl || item.imageUrl}
+                    src={getH264VideoUrl(item.videoUrl || item.imageUrl)}
                     className={`w-full h-auto object-cover grayscale-30 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out ${
                       i % 3 === 0 ? "aspect-[4/5]" : i % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
                     }`}

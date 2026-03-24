@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Stay Namcheon | 프리미엄 펜션 스테이 남천",
+  description: "도심 속 온전한 휴식, 프리미엄 독채 펜션 스테이 남천입니다. 자연과 함께하는 고요한 시간을 경험하세요.",
+};
 
 import prisma from "@/lib/db";
 import HeroSection from "@/components/HeroSection";

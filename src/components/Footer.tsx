@@ -11,7 +11,7 @@ const Footer = () => {
               Stay Namcheon
             </p>
             <p className="text-xs text-muted-foreground font-body leading-relaxed max-w-xs">
-              경산시 남천면 남천로31 스테이남천
+              경상북도 경산시 남천면 남천로 31 스테이남천
             </p>
           </div>
         </div>

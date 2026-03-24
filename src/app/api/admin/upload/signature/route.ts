@@ -1,10 +1,14 @@
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
+const cloud_name = (process.env.CLOUDINARY_CLOUD_NAME || "").replace(/['"]/g, '').trim();
+const api_key = (process.env.CLOUDINARY_API_KEY || "").replace(/['"]/g, '').trim();
+const api_secret = (process.env.CLOUDINARY_API_SECRET || "").replace(/['"]/g, '').trim();
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name,
+  api_key,
+  api_secret,
 });
 
 export const dynamic = "force-dynamic";
@@ -31,10 +35,13 @@ export async function POST(request: Request) {
       process.env.CLOUDINARY_API_SECRET
     );
 
+    const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || "").replace(/['"]/g, '').trim();
+    const apiKey = (process.env.CLOUDINARY_API_KEY || "").replace(/['"]/g, '').trim();
+
     return NextResponse.json({ 
       signature,
-      apiKey: process.env.CLOUDINARY_API_KEY,
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME
+      apiKey,
+      cloudName
     });
   } catch (error: any) {
     console.error("Signature generation error:", error);

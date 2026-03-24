@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pension",
+  description: "스테이 남천의 프리미엄 독채 객실을 소개합니다. 자연과 조화를 이루는 감성적인 공간에서 진정한 휴식을 즐겨보세요.",
+};
 
 import Hero from "@/components/Hero";
 import RoomCard from "@/components/RoomCard";

@@ -93,7 +93,7 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
         />
 
         <motion.p
-          className="font-body text-base md:text-lg font-light leading-relaxed text-primary-foreground/75 max-w-xl"
+          className="font-body text-base md:text-lg font-light leading-relaxed text-primary-foreground/75 max-w-xl whitespace-pre-wrap"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}

@@ -356,19 +356,14 @@ export default function GalleryPage() {
               >
                 {item.type === "video" ? (
                   <div className="relative aspect-[4/5]">
-                    <video
+                    <LazyVideo
                       src={getH264VideoUrl(item.src)}
                       poster={item.poster}
                       className="h-full w-full object-cover opacity-80 transition-all duration-700 group-hover:opacity-100 group-hover:scale-110"
                       muted
                       playsInline
                       loop
-                      preload="none"
-                      onMouseOver={(e) => e.currentTarget.play()}
-                      onMouseOut={(e) => {
-                        e.currentTarget.pause();
-                        e.currentTarget.currentTime = 0;
-                      }}
+                      autoPlay
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-transparent transition-colors">
                       <Play className="text-white w-10 h-10 opacity-60" strokeWidth={1.5} />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Save, Image as ImageIcon, Type, Layout, Coffee, Bed, Tent, Compass, Plus, Phone } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/upload";
+import SingleImageUploader from "@/components/admin/SingleImageUploader";
 
 const SECTIONS = [
   { id: "hero", name: "Hero Section", icon: Layout },
@@ -55,18 +55,6 @@ export default function HomeManagementPage() {
     }
   };
 
-  const handleImageUpload = async (section: string, file: File) => {
-    setSaving(true);
-    try {
-      const result = await uploadToCloudinary(file, "staynamcheon/home");
-      await handleUpdate(section, "imageUrl", result.secure_url);
-    } catch (err) {
-      console.error(err);
-      alert("Error uploading image");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (loading) return <div className="p-12 animate-pulse">Loading management console...</div>;
 
@@ -94,38 +82,13 @@ export default function HomeManagementPage() {
             
             <div className="p-8 flex-1 space-y-8">
               {/* Image/Video Preview & Upload */}
-              <div className="space-y-4">
+                <div className="space-y-4">
                 <label className="text-xs font-bold uppercase tracking-widest text-[#856669] block">Background Media (Image or MP4)</label>
-                <div className="relative aspect-video rounded-2xl overflow-hidden border border-[#e4dcdd] bg-[#f8f6f6] group">
-                  {(() => {
-                    const url = content.find(c => c.section === sec.id && c.key === "imageUrl")?.value || "/images/lovable/hero.jpg";
-                    const isVid = url.endsWith(".mp4") || url.includes("/video/upload/");
-                    if (isVid) {
-                      return <video src={url} autoPlay loop muted playsInline className="w-full h-full object-cover" />;
-                    }
-                    return <img src={url} alt={sec.name} className="w-full h-full object-cover" />;
-                  })()}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-
-                    <button 
-                      onClick={() => document.getElementById(`upload-${sec.id}`)?.click()}
-                      className="bg-white text-[#171212] px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
-                    >
-                      <ImageIcon size={16} />
-                      Change Media
-                    </button>
-                  </div>
-                  <input 
-                    type="file" 
-                    id={`upload-${sec.id}`}
-                    className="hidden" 
-                    accept="image/*,video/mp4"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload(sec.id, file);
-                    }}
-                  />
-                </div>
+                <SingleImageUploader 
+                  currentImageUrl={content.find(c => c.section === sec.id && c.key === "imageUrl")?.value || "/images/lovable/hero.jpg"}
+                  onUpload={(url) => handleUpdate(sec.id, "imageUrl", url)}
+                  acceptVideo
+                />
               </div>
 
               {/* Text Fields */}

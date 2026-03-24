@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Campnic",
+  description: "복잡한 준비 없이 즐기는 자연 속의 여유, 스테이 남천의 캠프닉입니다. 당일 글램핑과 피크닉으로 특별한 추억을 만드세요.",
+};
 
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";

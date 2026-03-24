@@ -53,7 +53,7 @@ const HeroSection = ({ content }: { content?: any }) => {
         style={{ opacity }}
       >
         <motion.p
-          className="text-xs font-body font-medium tracking-[0.4em] uppercase text-primary-foreground/60 mb-8"
+          className="text-xs font-body font-medium tracking-[0.4em] uppercase text-primary-foreground/60 mb-8 whitespace-pre-wrap"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}

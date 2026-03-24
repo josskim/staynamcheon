@@ -187,11 +187,11 @@ export default function PensionManagementPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">Hero Subtitle</label>
-                <input 
-                  type="text" 
+                <textarea 
+                  rows={3}
                   value={hero.subtitle}
                   onChange={(e) => { setHero({...hero, subtitle: e.target.value}); markChanged(); }}
-                  className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl px-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors"
+                  className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl px-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors resize-none"
                 />
               </div>
             </div>

@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Reservation",
+  description: "스테이 남천 예약 안내 및 이용 규정을 확인하세요. 온전한 휴식을 위한 정성 어린 안내가 준비되어 있습니다.",
+};
 
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, GripVertical, Image as ImageIcon, Play } from "lucide-react";
+import { Plus, Trash2, GripVertical, Image as ImageIcon, Play, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DndContext,
   closestCenter,
@@ -21,6 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import UploadModal from "./UploadModal";
+import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
 export interface MultiImageItem {
   id: string;      // Unique ID for sorting
@@ -43,6 +45,7 @@ export default function MultiImageUploader({
   horizontal = false,
 }: MultiImageUploaderProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -79,6 +82,10 @@ export default function MultiImageUploader({
     onChange([...items, ...addedItems]);
   };
 
+  const closeLightbox = () => setSelectedImageIndex(null);
+  const showNext = () => setSelectedImageIndex(prev => prev !== null ? (prev + 1) % items.length : null);
+  const showPrev = () => setSelectedImageIndex(prev => prev !== null ? (prev - 1 + items.length) % items.length : null);
+
   return (
     <div className={cn("space-y-4", className)}>
       {items.length > 0 ? (
@@ -101,22 +108,23 @@ export default function MultiImageUploader({
                   : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
               )}
             >
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <SortableImageItem
                   key={item.id}
                   item={item}
                   onRemove={() => handleRemove(item.id)}
                   onChange={(updates) => handleUpdate(item.id, updates)}
+                  onClick={() => setSelectedImageIndex(index)}
                 />
               ))}
               
               <button
                 type="button"
                 onClick={() => setIsUploadModalOpen(true)}
-                className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-[#e4dcdd] bg-[#f8f6f6]/30 text-[#856669] hover:bg-[#f8f6f6] hover:border-[#DB5461]/40 hover:text-[#DB5461] transition-all"
+                className="flex flex-col items-center justify-center aspect-video rounded-2xl border-2 border-dashed border-[#e4dcdd] bg-[#f8f6f6]/30 text-[#856669] hover:bg-[#f8f6f6] hover:border-[#DB5461]/40 hover:text-[#DB5461] transition-all"
               >
                 <Plus size={24} className="mb-2" />
-                <span className="font-bold text-sm">Add Image</span>
+                <span className="font-bold text-xs uppercase tracking-widest">Add Item</span>
               </button>
             </div>
           </SortableContext>
@@ -142,6 +150,71 @@ export default function MultiImageUploader({
           onSuccess={handleUploadSuccess}
         />
       )}
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {selectedImageIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999] bg-black/90 backdrop-blur-sm p-8 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            <button 
+              onClick={closeLightbox}
+              className="absolute top-8 right-8 text-white/70 hover:text-white p-2 transition-colors z-50"
+            >
+              <X size={40} />
+            </button>
+
+            {items.length > 1 && (
+              <>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); showPrev(); }}
+                  className="absolute left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-4 transition-colors z-50"
+                >
+                  <ChevronLeft size={60} strokeWidth={1} />
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); showNext(); }}
+                  className="absolute right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-4 transition-colors z-50"
+                >
+                  <ChevronRight size={60} strokeWidth={1} />
+                </button>
+              </>
+            )}
+
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-7xl max-h-[85vh] w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {items[selectedImageIndex].type === "video" ? (
+                <video 
+                  src={items[selectedImageIndex].src} 
+                  controls 
+                  autoPlay 
+                  className="max-h-full max-w-full rounded-lg shadow-2xl"
+                />
+              ) : (
+                <img 
+                  src={getOptimizeImageUrl(items[selectedImageIndex].src, { width: 1600 })} 
+                  alt={items[selectedImageIndex].alt || ""} 
+                  className="max-h-full max-w-full rounded-lg shadow-2xl object-contain"
+                />
+              )}
+              {items[selectedImageIndex].alt && (
+                <div className="absolute bottom-[-40px] left-0 right-0 text-center">
+                   <p className="text-white font-medium text-lg">{items[selectedImageIndex].alt}</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -150,10 +223,12 @@ function SortableImageItem({
   item,
   onRemove,
   onChange,
+  onClick,
 }: {
   item: MultiImageItem;
   onRemove: () => void;
   onChange: (updates: Partial<MultiImageItem>) => void;
+  onClick: () => void;
 }) {
   const {
     attributes,
@@ -179,21 +254,26 @@ function SortableImageItem({
       )}
     >
       <div className="relative aspect-video bg-black flex-1 overflow-hidden">
-        {item.type === "video" ? (
-          <div className="w-full h-full relative">
-            <video
-              src={item.src}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-              <Play size={24} className="text-white opacity-80" />
+        <div 
+          onClick={onClick}
+          className="w-full h-full cursor-zoom-in group-hover:scale-105 transition-transform duration-500"
+        >
+          {item.type === "video" ? (
+            <div className="w-full h-full relative">
+              <video
+                src={item.src}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                <Play size={24} className="text-white opacity-80" />
+              </div>
             </div>
-          </div>
-        ) : (
-          <img src={item.src} className="w-full h-full object-cover" alt="" />
-        )}
+          ) : (
+            <img src={getThumbnailUrl(item.src, 600)} className="w-full h-full object-cover" alt="" />
+          )}
+        </div>
         
-        <div className="absolute top-2 right-2 flex gap-1 z-10">
+        <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={onRemove}
@@ -206,7 +286,7 @@ function SortableImageItem({
         <div
           {...attributes}
           {...listeners}
-          className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center bg-white/90 text-[#856669] rounded-lg cursor-grab active:cursor-grabbing hover:text-black transition-colors shadow-sm z-10"
+          className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center bg-white/90 text-[#856669] rounded-lg cursor-grab active:cursor-grabbing hover:text-black transition-colors shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <GripVertical size={16} />
         </div>

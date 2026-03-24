@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cafe Namcheon",
+  description: "숲속에 자리 잡은 미니멀한 카페, 카페 남천입니다. 정성스럽게 내린 커피와 시각을 사로잡는 풍경을 함께 즐기세요.",
+};
 
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -35,9 +41,9 @@ export default async function CafePage() {
       { name: "아메리카노", price: "2,500원" },
       { name: "카페라떼", price: "3,000원" },
       { name: "카페모카", price: "3,000원" },
-      { name: "고구마라뗴", price: "3,000원" },
+      { name: "고구마라떼", price: "3,000원" },
       { name: "핫초코", price: "3,000원" },
-      { name: "바닐라라뗴", price: "3,000원" },
+      { name: "바닐라라떼", price: "3,000원" },
     ],
     ice: [
       { name: "아이스 아메리카노", price: "2,500원" },
@@ -45,7 +51,7 @@ export default async function CafePage() {
       { name: "아이스 카페모카", price: "3,500원" },
       { name: "아이스 고구마라떼", price: "3,500원" },
       { name: "아이스 핫초코", price: "3,500원" },
-      { name: "아이스 바닐라라뗴", price: "3,500원" },
+      { name: "아이스 바닐라라떼", price: "3,500원" },
     ],
     ade: [
       { name: "자몽에이드", price: "3,500원" },

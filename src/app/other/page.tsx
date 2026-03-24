@@ -1,4 +1,10 @@
 export const revalidate = 60;
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Experience",
+  description: "해먹 테라스부터 불멍 공간까지, 스테이 남천 구석구석 숨어있는 고요한 공간들을 탐험해보세요.",
+};
 
 import Hero from "@/components/Hero";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -67,7 +73,7 @@ export default async function OtherPage() {
                     <h3 className="text-5xl font-semibold tracking-tight mb-8">
                       {fac.subtitle}<span className="text-secondary">.</span>
                     </h3>
-                    <p className="text-lg text-muted-relaxed mb-10 text-muted-foreground leading-relaxed">
+                    <p className="text-lg text-muted-relaxed mb-10 text-muted-foreground leading-relaxed whitespace-pre-line">
                       {fac.description}
                     </p>
                     <div className="space-y-4">

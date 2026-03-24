@@ -5,7 +5,7 @@ import ScrollReveal from "./ScrollReveal";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { getMiniThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
+import { getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
 
@@ -59,7 +59,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
         >
           {currentImage.type === "video" || isVideo(currentImage.src) ? (
             <LazyVideo
-              src={currentImage.src}
+              src={getH264VideoUrl(currentImage.src)}
               className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
               autoPlay
               muted
@@ -125,7 +125,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                 className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${idx === activeIndex ? "border-foreground scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}`}
               >
                 {img.type === "video" || img.src?.match(/\.(mp4|webm|ogg|mov)$/i) || img.src?.includes("/video/upload/") ? (
-                  <video src={img.src} className="w-full h-full object-cover" preload="none" />
+                  <video src={getH264VideoUrl(img.src)} className="w-full h-full object-cover" preload="none" />
                 ) : (
                   <Image
                     src={getMiniThumbnailUrl(img.src)}
@@ -214,26 +214,25 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="px-4 relative flex items-center justify-center"
+              className="px-4 relative flex items-center justify-center w-full max-w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
             >
               {currentImage.type === "video" || currentImage.src?.match(/\.(mp4|webm|ogg|mov)$/i) || currentImage.src?.includes("/video/upload/") ? (
                 <video
-                  src={currentImage.src}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
+                  src={getH264VideoUrl(currentImage.src)}
+                  className="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain"
                   controls
                   autoPlay
                   playsInline
-                  onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
+                <div className="relative w-full aspect-video max-h-[85vh]">
                   <Image
                     src={getOptimizeImageUrl(currentImage.src, { width: 1600 })}
                     alt={currentImage.alt || name}
                     fill
                     sizes="90vw"
                     className="rounded-lg shadow-2xl object-contain"
-                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               )}
@@ -249,6 +248,7 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
         )}
       </AnimatePresence>
     </ScrollReveal>
+
   );
 };
 

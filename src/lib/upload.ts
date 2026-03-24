@@ -37,15 +37,23 @@ export async function uploadToCloudinaryWithSignature(file: File, sigData: any) 
   formData.append("folder", sigData.folder);
 
   const resourceType = file.type.startsWith("video/") ? "video" : "image";
+  const cloudName = (sigData.cloudName || "").replace(/['"]/g, '').trim();
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+
   let cloudinaryRes;
   try {
-    cloudinaryRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${resourceType}/upload`,
-      { method: "POST", body: formData }
-    );
+    console.log("Uploading to:", uploadUrl, {
+       resourceType,
+       fileType: file.type,
+       fileName: file.name,
+       hasSignature: !!sigData.signature,
+       timestamp: sigData.timestamp
+    });
+
+    cloudinaryRes = await fetch(uploadUrl, { method: "POST", body: formData });
   } catch (err: any) {
      console.error("Network error uploading to Cloudinary:", err);
-     throw new Error("클라우디너리 접속 오류가 발생했습니다.");
+     throw new Error(`클라우디너리 접속 오류가 발생했습니다. (URL: ${uploadUrl}) - ${err.message || '네트워크 문제'}`);
   }
 
   if (!cloudinaryRes.ok) {

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import ScrollReveal from "./ScrollReveal";
 import { getThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import LazyVideo from "./LazyVideo";
 
 interface GalleryItem {
   id?: string;
@@ -78,18 +79,14 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                 >
                   {isVideo(item) ? (
                     <div className="relative aspect-video">
-                      <video
-                        src={getH264VideoUrl(item.src || "")}
+                      <LazyVideo
+                        src={getH264VideoUrl(item.src || item.imageUrl || "")}
                         className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                         muted
                         playsInline
                         loop
-                        preload="none"
-                        onMouseOver={(e) => e.currentTarget.play()}
-                        onMouseOut={(e) => {
-                          e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
-                        }}
+                        autoPlay
+                        poster={getThumbnailUrl(item.src || item.imageUrl || "", 800)}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-transparent transition-colors">
                         <Play className="text-white w-12 h-12 opacity-80" strokeWidth={1.5} />
@@ -156,26 +153,25 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="px-4 relative"
+              className="px-4 relative flex items-center justify-center w-full max-w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
             >
               {lightboxIndex !== null && isVideo(images[lightboxIndex]) ? (
                 <video
                   src={getH264VideoUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "")}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
+                  className="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain"
                   controls
                   autoPlay
                   playsInline
-                  onClick={(e) => e.stopPropagation()}
                 />
               ) : lightboxIndex !== null ? (
-                <div className="relative max-h-[85vh] max-w-[90vw] w-full aspect-video">
+                <div className="relative w-full aspect-video max-h-[85vh]">
                   <Image
                     src={getOptimizeImageUrl(images[lightboxIndex].src || images[lightboxIndex].imageUrl || "", { width: 1600 })}
                     alt={images[lightboxIndex].alt}
                     fill
                     sizes="90vw"
                     className="rounded-lg shadow-2xl object-contain"
-                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               ) : null}
