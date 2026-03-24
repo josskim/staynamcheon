@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, PlayCircle, Share2, X, Play } from "lucide-r
 import { cn } from "@/lib/utils";
 import ScrollReveal from "@/components/ScrollReveal";
 import Image from "next/image";
-import { getThumbnailUrl, getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 import LazyVideo from "@/components/LazyVideo";
 
 type GalleryItem = {
@@ -310,7 +310,13 @@ export default function GalleryPage() {
                 >
                   {item.type === "video" ? (
                     <div className="relative h-full w-full">
-                      <video src={getH264VideoUrl(item.src)} poster={item.poster} className="h-full w-full object-cover" preload="none" />
+                      <Image 
+                        src={getVideoThumbnailUrl(item.src, 200)} 
+                        alt="" 
+                        fill 
+                        sizes="112px" 
+                        className="object-cover" 
+                      />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                         <PlayCircle size={12} className="text-white/80" />
                       </div>
@@ -427,7 +433,7 @@ export default function GalleryPage() {
               ) : (
                 <Image
                   src={getOptimizeImageUrl(selectedItem.src, { width: 1600, quality: "auto:good", format: "auto" })}
-                  alt={selectedItem.alt}
+                  alt={selectedItem.alt || ""}
                   fill
                   sizes="(max-width: 768px) 100vw, 1600px"
                   className="object-contain"

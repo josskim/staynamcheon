@@ -97,3 +97,22 @@ export function getMiniThumbnailUrl(url: string) {
     crop: "fill",
   });
 }
+
+/**
+ * Cloudinary 비디오 URL에서 이미지 썸네일(JPG)을 생성.
+ * so_auto를 사용하여 적절한 프레임을 썸네일로 추출.
+ */
+export function getVideoThumbnailUrl(url: string, width: number = 400) {
+  if (!url || !url.includes("cloudinary.com") || !url.includes("/video/upload/")) return url;
+  
+  // 기본 이미지 추출 변환 추가
+  // so_auto: 자동으로 적절한 장면 추출
+  // f_jpg: 결과물을 jpg로 변환
+  const parts = url.split("/upload/");
+  if (parts.length !== 2) return url;
+  
+  // 확장자 제거 및 .jpg 추가
+  const pathWithoutExt = parts[1].replace(/\.[^/.]+$/, "");
+  
+  return `${parts[0]}/video/upload/c_fill,w_${width},q_auto,so_auto,f_jpg/${pathWithoutExt}.jpg`;
+}

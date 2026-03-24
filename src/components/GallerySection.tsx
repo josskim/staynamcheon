@@ -5,7 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { getThumbnailUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getH264VideoUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
 const GallerySection = () => {
@@ -78,7 +78,7 @@ const GallerySection = () => {
                     playsInline
                     loop
                     autoPlay
-                    poster={item.imageUrl ? getThumbnailUrl(item.imageUrl, 800) : ""}
+                    poster={getVideoThumbnailUrl(item.videoUrl || item.imageUrl || "", 800)}
                   />
                 ) : (
                   <div className={cn(

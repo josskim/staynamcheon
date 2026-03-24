@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import ScrollReveal from "./ScrollReveal";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, PlayCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import { getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
 
@@ -125,7 +125,18 @@ const RoomCard = ({ name, description, image, gallery, prices, index }: RoomCard
                 className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${idx === activeIndex ? "border-foreground scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}`}
               >
                 {img.type === "video" || img.src?.match(/\.(mp4|webm|ogg|mov)$/i) || img.src?.includes("/video/upload/") ? (
-                  <video src={getH264VideoUrl(img.src)} className="w-full h-full object-cover" preload="none" />
+                  <div className="w-full h-full relative">
+                    <Image
+                      src={getVideoThumbnailUrl(img.src, 200)}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                       <PlayCircle size={16} className="text-white opacity-80" />
+                    </div>
+                  </div>
                 ) : (
                   <Image
                     src={getMiniThumbnailUrl(img.src)}

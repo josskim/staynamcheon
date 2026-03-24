@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import Image from "next/image";
-import { getThumbnailUrl, getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getMiniThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 import LazyVideo from "@/components/LazyVideo";
 
 interface ImageItem {
@@ -96,9 +96,17 @@ export default function FacilityGallery({ images }: { images: ImageItem[] }) {
             }`}
           >
             {isVideo(img.src) ? (
-              <div className="h-full w-full bg-muted flex items-center justify-center relative">
-                <video src={getH264VideoUrl(img.src)} className="h-full w-full object-cover opacity-50" preload="none" />
-                <Maximize2 size={12} className="absolute text-white" />
+              <div className="h-full w-full relative">
+                <Image
+                  src={getVideoThumbnailUrl(img.src, 200)}
+                  alt=""
+                  fill
+                  sizes="64px"
+                  className="object-cover opacity-60"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                   <Maximize2 size={12} className="text-white" />
+                </div>
               </div>
             ) : (
               <Image

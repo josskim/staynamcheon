@@ -5,7 +5,7 @@ import { X, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import ScrollReveal from "./ScrollReveal";
-import { getThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl } from "@/lib/cloudinary";
+import { getThumbnailUrl, getOptimizeImageUrl, getH264VideoUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 import LazyVideo from "./LazyVideo";
 
 interface GalleryItem {
@@ -86,7 +86,7 @@ const RoomGallery = ({ images: rawImages }: RoomGalleryProps) => {
                         playsInline
                         loop
                         autoPlay
-                        poster={getThumbnailUrl(item.src || item.imageUrl || "", 800)}
+                        poster={getVideoThumbnailUrl(item.src || item.imageUrl || "", 800)}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-transparent transition-colors">
                         <Play className="text-white w-12 h-12 opacity-80" strokeWidth={1.5} />
