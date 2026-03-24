@@ -21,7 +21,8 @@ export default function ReservationManagementPage() {
   });
 
   const [info, setInfo] = useState({
-    checkin: "오후 3:00"
+    checkin: "오후 3:00",
+    checkout: "오전 11:00"
   });
 
   const [refundPolicy, setRefundPolicy] = useState([
@@ -46,7 +47,10 @@ export default function ReservationManagementPage() {
         });
         
         setContact({ phone: getVal("contact", "phone", "010-9038-5822") });
-        setInfo({ checkin: getVal("info", "checkin", "오후 3:00") });
+        setInfo({ 
+          checkin: getVal("info", "checkin", "오후 3:00"),
+          checkout: getVal("info", "checkout", "오전 11:00")
+        });
 
         setRefundPolicy(getJson("policy", "refund", [
           { period: "이용일 기준 10일전 취소", refund: "전액환불" },
@@ -74,6 +78,7 @@ export default function ReservationManagementPage() {
         { page: "reservation", section: "hero", key: "imageUrl", value: hero.imageUrl, type: "image" },
         { page: "reservation", section: "contact", key: "phone", value: contact.phone, type: "text" },
         { page: "reservation", section: "info", key: "checkin", value: info.checkin, type: "text" },
+        { page: "reservation", section: "info", key: "checkout", value: info.checkout, type: "text" },
         { page: "reservation", section: "policy", key: "refund", value: JSON.stringify(refundPolicy), type: "json" },
       ];
 
@@ -182,7 +187,7 @@ export default function ReservationManagementPage() {
               Contact & Info (예약문의 및 체크인 시간)
             </h3>
           </div>
-          <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">전화번호 (Phone Number)</label>
               <div className="relative">
@@ -196,13 +201,25 @@ export default function ReservationManagementPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">체크인 기준 시간 (Check-in time)</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">체크인 시간 (Check-in)</label>
               <div className="relative">
                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#856669]" size={18} />
                 <input 
                   type="text" 
                   value={info.checkin}
-                  onChange={(e) => { setInfo({ checkin: e.target.value }); markChanged(); }}
+                  onChange={(e) => { setInfo({ ...info, checkin: e.target.value }); markChanged(); }}
+                  className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl pl-12 pr-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-[#856669]">체크아웃 시간 (Check-out)</label>
+              <div className="relative">
+                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#856669]" size={18} />
+                <input 
+                  type="text" 
+                  value={info.checkout}
+                  onChange={(e) => { setInfo({ ...info, checkout: e.target.value }); markChanged(); }}
                   className="w-full bg-[#f8f6f6] border border-[#e4dcdd] rounded-xl pl-12 pr-4 py-3 text-[#171212] focus:border-[#DB5461] outline-none transition-colors"
                 />
               </div>

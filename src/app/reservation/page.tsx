@@ -38,6 +38,7 @@ export default async function ReservationPage() {
 
   const phone = getVal("contact", "phone", "010-9038-5822");
   const checkin = getVal("info", "checkin", "오후 3:00");
+  const checkout = getVal("info", "checkout", "오전 11:00");
 
   const refundPolicy = getJson("policy", "refund", [
     { period: "이용일 기준 10일전 취소", refund: "전액환불" },
@@ -90,17 +91,26 @@ export default async function ReservationPage() {
             </ScrollReveal>
 
             <ScrollReveal direction="left" delay={0.2}>
-              <div className="h-full p-8 md:p-12 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col items-center text-center group hover:bg-foreground/10 transition-all duration-500">
-                <div className="w-16 h-16 rounded-full bg-foreground/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                  <Clock className="text-foreground" size={32} />
+              <div className="flex flex-col gap-6 h-full">
+                <div className="flex-1 p-6 md:p-8 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col items-center justify-center text-center group hover:bg-foreground/10 transition-all duration-500">
+                  <div className="w-12 h-12 rounded-full bg-foreground/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                    <Clock className="text-foreground" size={24} />
+                  </div>
+                  <h3 className="text-xs font-bold tracking-widest uppercase mb-2 opacity-60 text-foreground">체크인 기준 시간</h3>
+                  <p className="text-2xl md:text-3xl font-semibold tracking-tight">
+                    {checkin}
+                  </p>
                 </div>
-                <h3 className="text-sm font-bold tracking-widest uppercase mb-4 opacity-60">체크인 기준 시간</h3>
-                <p className="text-3xl md:text-4xl font-semibold tracking-tight">
-                  {checkin}
-                </p>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  * 환불 규정은 체크인 시간을 기준으로 적용됩니다.
-                </p>
+
+                <div className="flex-1 p-6 md:p-8 rounded-3xl bg-secondary/5 border border-secondary/10 flex flex-col items-center justify-center text-center group hover:bg-secondary/10 transition-all duration-500">
+                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                    <Clock className="text-secondary" size={24} />
+                  </div>
+                  <h3 className="text-xs font-bold tracking-widest uppercase mb-2 text-secondary">체크아웃 기준 시간</h3>
+                  <p className="text-2xl md:text-3xl font-semibold tracking-tight">
+                    {checkout}
+                  </p>
+                </div>
               </div>
             </ScrollReveal>
           </div>
