@@ -143,5 +143,5 @@ export function getVideoThumbnailUrl(url: string, width: number = 400) {
   // 확장자 제거 및 .jpg 추가
   const pathWithoutExt = parts[1].replace(/\.[^/.]+$/, "");
   
-  return `${parts[0]}/video/upload/c_fill,w_${width},q_auto,so_auto,f_jpg/${pathWithoutExt}.jpg`;
+  return `${parts[0]}/upload/c_fill,w_${width},q_auto,so_auto,f_jpg/${pathWithoutExt}.jpg`;
 }
