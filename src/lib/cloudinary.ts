@@ -28,9 +28,32 @@ export function getOptimizeImageUrl(
   // Cloudinary URL format: res.cloudinary.com/cloud_name/image/upload/v12345678/folder/image.jpg
   // Transformation goes after /upload/
   const parts = url.split("/upload/");
-  if (parts.length !== 2) return url;
+  if (parts.length !== 2) {
+    // Check if it's a video or raw file
+    if (url.includes("/video/upload/")) {
+      const vParts = url.split("/video/upload/");
+      if (vParts.length === 2) {
+        return applyTransform(vParts[0], "/video/upload/", vParts[1], options);
+      }
+    }
+    return url;
+  }
 
+  return applyTransform(parts[0], "/upload/", parts[1], options);
+}
+
+/**
+ * Helper to apply transformations while stripping existing ones.
+ */
+function applyTransform(
+  baseUrl: string, 
+  uploadSegment: string, 
+  remainingPath: string, 
+  options: any
+) {
+  const { width, height, quality, format, crop } = options;
   const transformations = [];
+  
   if (width) transformations.push(`w_${width}`);
   if (height) transformations.push(`h_${height}`);
   if (crop && (width || height)) {
@@ -46,7 +69,17 @@ export function getOptimizeImageUrl(
   const transformationStr = transformations.join(",");
   const finalTransform = transformationStr ? `${transformationStr}/` : "";
 
-  return `${parts[0]}/upload/${finalTransform}${parts[1]}`;
+  // Strip existing transformations if present
+  const pathParts = remainingPath.split("/");
+  const firstSegment = pathParts[0];
+
+  // Cloudinary transformation segments usually contain an underscore (e.g., w_200) 
+  // but are not versions (v123456)
+  if (firstSegment.includes("_") && !/^v\d+$/.test(firstSegment)) {
+    pathParts.shift();
+  }
+
+  return `${baseUrl}${uploadSegment}${finalTransform}${pathParts.join("/")}`;
 }
 
 /**
