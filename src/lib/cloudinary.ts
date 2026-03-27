@@ -27,19 +27,15 @@ export function getOptimizeImageUrl(
 
   // Cloudinary URL format: res.cloudinary.com/cloud_name/image/upload/v12345678/folder/image.jpg
   // Transformation goes after /upload/
+  // Use a simple split on "/upload/" which works for both images and videos
   const parts = url.split("/upload/");
-  if (parts.length !== 2) {
-    // Check if it's a video or raw file
-    if (url.includes("/video/upload/")) {
-      const vParts = url.split("/video/upload/");
-      if (vParts.length === 2) {
-        return applyTransform(vParts[0], "/video/upload/", vParts[1], options);
-      }
-    }
-    return url;
-  }
+  if (parts.length !== 2) return url;
 
-  return applyTransform(parts[0], "/upload/", parts[1], options);
+  // baseUrl might be .../image or .../video or .../raw
+  const baseUrl = parts[0];
+  const remainingPath = parts[1];
+
+  return applyTransform(baseUrl, "/upload/", remainingPath, options);
 }
 
 /**
