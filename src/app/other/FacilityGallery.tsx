@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import Image from "next/image";
@@ -15,6 +15,7 @@ interface ImageItem {
 export default function FacilityGallery({ images }: { images: ImageItem[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const thumbRef = useRef<HTMLDivElement>(null);
 
   if (!images || images.length === 0) {
     return <div className="aspect-[4/3] rounded-2xl bg-muted animate-pulse" />;
@@ -25,8 +26,26 @@ export default function FacilityGallery({ images }: { images: ImageItem[] }) {
 
   const isVideo = (src: string) => src.toLowerCase().endsWith(".mp4") || src.includes("/video/upload/");
 
+  const scrollThumb = (dir: "left" | "right") => {
+    if (!thumbRef.current) return;
+    thumbRef.current.scrollBy({ left: dir === "left" ? -120 : 120, behavior: "smooth" });
+  };
+
+  // Sync thumbnail strip when currentIndex changes
+  useEffect(() => {
+    const container = thumbRef.current;
+    if (!container) return;
+    const target = container.querySelector<HTMLButtonElement>(`[data-thumb="${currentIndex}"]`);
+    if (!target) return;
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const offset = targetRect.left - containerRect.left - containerRect.width / 2 + targetRect.width / 2;
+    container.scrollBy({ left: offset, behavior: "smooth" });
+  }, [currentIndex]);
+
   return (
     <div className="relative group">
+      {/* Main image */}
       <div
         className="aspect-[4/3] overflow-hidden rounded-2xl bg-muted shadow-xl border border-border/50 cursor-pointer"
         onClick={() => setLightboxOpen(true)}
@@ -63,65 +82,88 @@ export default function FacilityGallery({ images }: { images: ImageItem[] }) {
           </motion.div>
         </AnimatePresence>
 
-        {/* 확대 아이콘 */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10">
           <Maximize2 className="text-white w-10 h-10 drop-shadow-lg" strokeWidth={1.5} />
         </div>
       </div>
 
+      {/* Main image prev/next */}
       {images.length > 1 && (
         <>
           <button
             onClick={(e) => { e.stopPropagation(); prev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40 z-10"
+            className="absolute left-4 top-[calc(50%-40px)] -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40 z-10"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40 z-10"
+            className="absolute right-4 top-[calc(50%-40px)] -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40 z-10"
           >
             <ChevronRight size={24} />
           </button>
         </>
       )}
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {images.map((img, idx) => (
+      {/* Thumbnail strip with arrow buttons */}
+      {images.length > 1 && (
+        <div className="mt-4 flex items-center gap-1">
           <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`relative w-16 aspect-square rounded-md overflow-hidden border-2 shrink-0 transition-all ${
-              idx === currentIndex ? "border-secondary opacity-100 scale-105" : "border-transparent opacity-50 hover:opacity-100"
-            }`}
+            onClick={() => scrollThumb("left")}
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center hover:bg-muted-foreground/20 transition-colors"
           >
-            {isVideo(img.src) ? (
-              <div className="h-full w-full relative">
-                <Image
-                  src={getVideoThumbnailUrl(img.src, 200)}
-                  alt=""
-                  fill
-                  sizes="64px"
-                  className="object-cover opacity-60"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                   <Maximize2 size={12} className="text-white" />
-                </div>
-              </div>
-            ) : (
-              <Image
-                src={getMiniThumbnailUrl(img.src)}
-                alt=""
-                fill
-                sizes="64px"
-                className="object-cover"
-              />
-            )}
+            <ChevronLeft size={16} />
           </button>
-        ))}
-      </div>
 
-      {/* 라이트박스 */}
+          <div
+            ref={thumbRef}
+            className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1"
+          >
+            {images.map((img, idx) => (
+              <button
+                key={idx}
+                data-thumb={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`relative w-16 aspect-square rounded-md overflow-hidden border-2 shrink-0 transition-all ${
+                  idx === currentIndex ? "border-secondary opacity-100 scale-105" : "border-transparent opacity-50 hover:opacity-100"
+                }`}
+              >
+                {isVideo(img.src) ? (
+                  <div className="h-full w-full relative">
+                    <Image
+                      src={getVideoThumbnailUrl(img.src, 200)}
+                      alt=""
+                      fill
+                      sizes="64px"
+                      className="object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Maximize2 size={12} className="text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <Image
+                    src={getMiniThumbnailUrl(img.src)}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => scrollThumb("right")}
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center hover:bg-muted-foreground/20 transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Lightbox */}
       <AnimatePresence>
         {lightboxOpen && (
           <motion.div

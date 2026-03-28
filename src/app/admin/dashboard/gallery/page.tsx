@@ -32,16 +32,32 @@ import { cn } from "@/lib/utils";
 import UploadModal from "@/components/admin/UploadModal";
 import { getThumbnailUrl, getOptimizeImageUrl } from "@/lib/cloudinary";
 
+const PAGE_SECTION_OPTIONS = [
+  { label: "홈 > 메인갤러리", value: "home>gallery" },
+  { label: "카페 > 갤러리", value: "cafe>gallery" },
+  { label: "펜션 > 갤러리", value: "pension>gallery" },
+  { label: "펜션 > 201호", value: "pension>201" },
+  { label: "펜션 > 202호", value: "pension>202" },
+  { label: "펜션 > 101호", value: "pension>101" },
+  { label: "캠프닉 > 갤러리", value: "campnic>gallery" },
+  { label: "기타 > 갤러리", value: "other>gallery" },
+  { label: "기타 > 수영장", value: "other>pool" },
+  { label: "기타 > 트램폴린", value: "other>bounce" },
+  { label: "기타 > 탁구", value: "other>pingpong" },
+  { label: "기타 > 골프", value: "other>golf" },
+];
+
 interface GalleryItem {
   id: string;
   imageUrl: string;
-  publicId?: string; // Optional for existing items
+  publicId?: string;
   videoUrl?: string;
   type: "image" | "video";
   order: number;
-  isVisible: boolean; // Added for completeness
-  isMain: boolean;    // New field
-  isStaged?: boolean; // New items not yet saved
+  isVisible: boolean;
+  isMain: boolean;
+  pages?: string[];    // page>section tags
+  isStaged?: boolean;
 }
 
 export default function GalleryManagementPage() {
@@ -53,6 +69,7 @@ export default function GalleryManagementPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<GalleryItem | null>(null);
+  const [pagesEditItem, setPagesEditItem] = useState<GalleryItem | null>(null);
   const stagedPublicIdsRef = useRef<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const lastSelectedIndexRef = useRef<number | null>(null);
@@ -111,7 +128,8 @@ export default function GalleryManagementPage() {
         setItems(data.map((item: any) => ({
           ...item,
           isVisible: item.isVisible ?? true,
-          isMain: item.isMain ?? false
+          isMain: item.isMain ?? false,
+          pages: item.pages ? (typeof item.pages === "string" ? JSON.parse(item.pages) : item.pages) : null,
         })));
         setSelectedIds(new Set());
         lastSelectedIndexRef.current = null;
@@ -152,7 +170,8 @@ export default function GalleryManagementPage() {
         videoUrl: item.videoUrl,
         type: item.type,
         order: index + 1,
-        isMain: item.isMain
+        isMain: item.isMain,
+        pages: item.pages ?? null,
       }));
 
       const res = await fetch("/api/admin/gallery/commit", {
@@ -280,9 +299,25 @@ export default function GalleryManagementPage() {
     }
   };
 
+  const togglePageTag = async (item: GalleryItem, tag: string) => {
+    const current = item.pages ?? [];
+    const next = current.includes(tag) ? current.filter(p => p !== tag) : [...current, tag];
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, pages: next } : i));
+    setPagesEditItem(prev => prev?.id === item.id ? { ...prev, pages: next } : prev);
+    if (!item.isStaged) {
+      await fetch("/api/admin/gallery", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id, pages: next }),
+      });
+    } else {
+      setHasChanges(true);
+    }
+  };
+
   const addStagedItems = (newItems: { url: string, publicId: string, type: "image" | "video", posterUrl?: string }[]) => {
     const staged: GalleryItem[] = newItems.map(ni => ({
-      id: Math.random().toString(), // Temp ID for DnD key
+      id: Math.random().toString(),
       imageUrl: ni.type === "video" ? (ni.posterUrl || ni.url) : ni.url,
       videoUrl: ni.type === "video" ? ni.url : undefined,
       publicId: ni.publicId,
@@ -290,9 +325,10 @@ export default function GalleryManagementPage() {
       order: 0,
       isVisible: true,
       isMain: false,
+      pages: [],
       isStaged: true
     }));
-    setItems(prev => [...staged, ...prev]); // Prepend new items
+    setItems(prev => [...staged, ...prev]);
     setHasChanges(true);
   };
 
@@ -369,6 +405,7 @@ export default function GalleryManagementPage() {
                     setHasChanges(true);
                   }}
                   onPreview={() => setPreviewItem(item)}
+                  onEditPages={() => setPagesEditItem(item)}
                 />
               ))}
             </AnimatePresence>
@@ -438,6 +475,52 @@ export default function GalleryManagementPage() {
         </div>
       )}
 
+      {/* Pages Edit Modal */}
+      {pagesEditItem && (
+        <div
+          className="fixed inset-0 z-[130] flex items-center justify-center p-6"
+          onClick={() => setPagesEditItem(null)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative z-[131] w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-5 border-b border-[#e4dcdd] flex items-center justify-between">
+              <h3 className="font-bold text-[#171212]">노출 위치 설정</h3>
+              <button onClick={() => setPagesEditItem(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f4f1f1]">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="px-6 py-4 space-y-2 max-h-[60vh] overflow-y-auto">
+              {PAGE_SECTION_OPTIONS.map((opt) => {
+                const isChecked = (pagesEditItem.pages ?? []).includes(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => togglePageTag(pagesEditItem, opt.value)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium transition-all",
+                      isChecked
+                        ? "bg-[#DB5461]/10 border-[#DB5461] text-[#DB5461]"
+                        : "bg-[#f8f6f6] border-[#e4dcdd] text-[#171212] hover:border-[#DB5461]/40"
+                    )}
+                  >
+                    <span className={cn("w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0", isChecked ? "bg-[#DB5461] border-[#DB5461]" : "border-[#ccc]")}>
+                      {isChecked && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </span>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="px-6 py-4 border-t border-[#e4dcdd]">
+              <p className="text-xs text-[#856669]">선택한 위치에 이미지가 노출됩니다. 즉시 저장됩니다.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Action Buttons */}
       <div className="fixed bottom-6 md:bottom-10 right-6 md:right-10 z-[100] flex items-center gap-3 pointer-events-none">
         <AnimatePresence mode="popLayout">
@@ -489,6 +572,7 @@ function SortableGalleryItem({
   onToggleSelect,
   onToggleMain,
   onPreview,
+  onEditPages,
 }: {
   item: GalleryItem;
   index: number;
@@ -497,6 +581,7 @@ function SortableGalleryItem({
   onToggleSelect: (shiftKey: boolean) => void;
   onToggleMain: () => void;
   onPreview: () => void;
+  onEditPages: () => void;
 }) {
   const {
     attributes,
@@ -524,6 +609,7 @@ function SortableGalleryItem({
         onToggleSelect={onToggleSelect}
         onToggleMain={onToggleMain}
         onPreview={onPreview}
+        onEditPages={onEditPages}
         dragAttributes={attributes}
         dragListeners={listeners}
       />
@@ -541,6 +627,7 @@ function GalleryCard({
   onToggleSelect,
   onToggleMain,
   onPreview,
+  onEditPages,
   dragAttributes,
   dragListeners
 }: {
@@ -553,6 +640,7 @@ function GalleryCard({
   onToggleSelect?: (shiftKey: boolean) => void;
   onToggleMain?: () => void;
   onPreview?: () => void;
+  onEditPages?: () => void;
   dragAttributes?: any;
   dragListeners?: any;
 }) {
@@ -626,6 +714,29 @@ function GalleryCard({
         >
           <Search size={16} />
         </button>
+      )}
+      {onEditPages && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditPages();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="absolute bottom-4 left-4 z-20 w-9 h-9 rounded-2xl bg-[#DB5461] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95 shadow-lg"
+          aria-label="노출 위치 설정"
+          title="노출 위치 설정"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+        </button>
+      )}
+      {/* Pages count badge */}
+      {item.pages && item.pages.length > 0 && (
+        <div className="absolute top-4 right-4 z-10 bg-[#DB5461] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md pointer-events-none">
+          {item.pages.length}곳
+        </div>
       )}
       {item.type === "video" ? (
         <div className="w-full h-full bg-black">

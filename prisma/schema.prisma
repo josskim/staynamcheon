@@ -76,8 +76,28 @@ model StayGalleryItem {
   isVisible   Boolean  @default(true)
   isMain      Boolean  @default(false)
   category    String?  // e.g., "interior", "exterior", "landscape"
+  pages       String?  // JSON array of "page>section" tags e.g. ["gallery>gallery","cafe>gallery"]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("stay_gallery_items")
+}
+
+model PageView {
+  id             String   @id @default(cuid())
+  path           String
+  referrer       String?
+  referrerDomain String?
+  userAgent      String?
+  browser        String?
+  os             String?
+  device         String?
+  ipHash         String?
+  sessionId      String?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([referrerDomain])
+  @@map("page_views")
 }

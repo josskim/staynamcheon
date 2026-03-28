@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { 
-  LayoutDashboard, 
-  Image as ImageIcon, 
-  FileText, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Image as ImageIcon,
+  FileText,
+  Settings,
   LogOut,
   Home,
   Coffee,
@@ -13,7 +13,8 @@ import {
   Tent,
   Compass,
   Layout,
-  CalendarDays
+  CalendarDays,
+  BarChart2
 } from "lucide-react";
 
 import { LogoutButton } from "./LogoutButton";
@@ -40,6 +41,7 @@ export default async function AdminDashboardLayout({
     { name: "Other", icon: "Compass", href: "/admin/dashboard/other" },
     { name: "Reservation", icon: "CalendarDays", href: "/admin/dashboard/reservation" },
     { name: "Gallery", icon: "Image", href: "/admin/dashboard/gallery" },
+    { name: "Analytics", icon: "BarChart2", href: "/admin/dashboard/analytics" },
     { name: "Settings", icon: "Settings", href: "/admin/dashboard/settings" },
   ];
 

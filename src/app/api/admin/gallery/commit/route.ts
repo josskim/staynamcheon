@@ -120,6 +120,7 @@ export async function POST(request: Request) {
               type: item.type,
               order: item.order,
               isMain: item.isMain || false,
+              pages: item.pages ? JSON.stringify(item.pages) : null,
             }
           });
           committedItems.push(newItem);
@@ -152,6 +153,7 @@ export async function POST(request: Request) {
               type: item.type,
               order: item.order,
               isMain: item.isMain || false,
+              pages: item.pages ? JSON.stringify(item.pages) : null,
             }
           });
           committedItems.push(newItem);
@@ -168,13 +170,14 @@ export async function POST(request: Request) {
           }
         }
       } else {
-        // Existing item, just update order
+        // Existing item update
+        const updateData: any = {};
+        if (typeof item.order === "number") updateData.order = item.order;
+        if (typeof item.isMain === "boolean") updateData.isMain = item.isMain;
+        if ("pages" in item) updateData.pages = item.pages ? JSON.stringify(item.pages) : null;
         await prisma.stayGalleryItem.update({
           where: { id: item.id },
-          data: { 
-            order: item.order,
-            isMain: item.isMain
-          }
+          data: updateData,
         });
       }
     }

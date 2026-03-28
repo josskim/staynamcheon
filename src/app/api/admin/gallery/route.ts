@@ -34,10 +34,24 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = searchParams.get("limit");
   const isMain = searchParams.get("isMain");
+  const pageTag = searchParams.get("page");   // e.g. "cafe"
+  const sectionTag = searchParams.get("section"); // e.g. "gallery"
 
   try {
+    let where: any = {};
+    if (isMain === "true") {
+      where = { isMain: true, isVisible: true };
+    } else if (pageTag && sectionTag) {
+      // Filter items tagged for a specific page>section
+      const tag = `${pageTag}>${sectionTag}`;
+      where = {
+        isVisible: true,
+        pages: { contains: tag },
+      };
+    }
+
     const items = await prisma.stayGalleryItem.findMany({
-      where: isMain === "true" ? { isMain: true, isVisible: true } : {},
+      where,
       orderBy: [
         { order: "asc" },
         { createdAt: "desc" }
@@ -56,11 +70,21 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { items } = await request.json(); // Array of { id, order }
-    
-    // Perform bulk update in a transaction
+    const body = await request.json();
+
+    // Single item pages update: { id, pages }
+    if (body.id && "pages" in body) {
+      await prisma.stayGalleryItem.update({
+        where: { id: body.id },
+        data: { pages: body.pages ? JSON.stringify(body.pages) : null },
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    // Bulk reorder: { items: [{ id, order }] }
+    const { items } = body;
     await prisma.$transaction(
-      items.map((item: any) => 
+      items.map((item: any) =>
         prisma.stayGalleryItem.update({
           where: { id: item.id },
           data: { order: item.order }
@@ -71,7 +95,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Batch update error:", error);
-    return NextResponse.json({ message: "Error reordering items" }, { status: 500 });
+    return NextResponse.json({ message: "Error updating items" }, { status: 500 });
   }
 }
 

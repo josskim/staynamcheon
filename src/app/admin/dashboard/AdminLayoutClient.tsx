@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { 
-  Menu, 
-  X, 
+import {
+  Menu,
+  X,
   Settings,
   LayoutDashboard,
   Layout,
@@ -13,7 +13,8 @@ import {
   Coffee,
   Compass,
   CalendarDays,
-  Image as ImageIcon
+  Image as ImageIcon,
+  BarChart2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
@@ -33,7 +34,8 @@ const ICON_MAP: Record<string, any> = {
   Compass,
   CalendarDays,
   Image: ImageIcon,
-  Settings
+  BarChart2,
+  Settings,
 };
 
 export default function AdminLayoutClient({
