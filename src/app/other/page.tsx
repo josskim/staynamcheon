@@ -2,8 +2,14 @@ export const revalidate = 60;
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Experience",
-  description: "해먹 테라스부터 불멍 공간까지, 스테이 남천 구석구석 숨어있는 고요한 공간들을 탐험해보세요.",
+  title: "부대시설",
+  description: "해먹 테라스, 수영장, 불멍 공간까지. 경산 스테이 남천의 다양한 부대시설을 경험하세요.",
+  alternates: { canonical: "https://staynamcheon.com/other" },
+  openGraph: {
+    title: "부대시설 | 스테이 남천",
+    description: "해먹 테라스·수영장·불멍. 스테이 남천 부대시설 안내.",
+    images: [{ url: "/images/lovable/other.jpg", width: 1200, height: 630, alt: "스테이 남천 부대시설" }],
+  },
 };
 
 import Hero from "@/components/Hero";
@@ -32,6 +38,18 @@ export default async function OtherPage() {
     }
   };
 
+  // Fetch tagged gallery items for other page sections
+  const taggedOtherItems = await prisma.stayGalleryItem.findMany({
+    where: { isVisible: true, pages: { contains: "other>" } },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+  const getTaggedImages = (section: string) =>
+    taggedOtherItems
+      .filter((item: any) => {
+        try { return JSON.parse(item.pages || "[]").includes(`other>${section}`); } catch { return false; }
+      })
+      .map((item: any) => ({ src: item.videoUrl || item.imageUrl, alt: item.title || "" }));
+
   const facilityIds = ["pool", "bounce", "pingpong", "golf"];
   const facilities = facilityIds.map(id => ({
     id,
@@ -39,7 +57,7 @@ export default async function OtherPage() {
     subtitle: getVal(id, "subtitle"),
     description: getVal(id, "description"),
     rules: getJson(id, "rules", []),
-    images: getJson(id, "images", [])
+    images: [...getJson(id, "images", []), ...getTaggedImages(id)]
   })).filter(f => f.subtitle || f.description); // Only show if seeded
 
   return (
@@ -107,8 +125,8 @@ export default async function OtherPage() {
             <h3 className="text-3xl font-semibold tracking-tight">Full Gallery</h3>
           </div>
         </ScrollReveal>
-        <RoomGallery 
-          images={getJson("gallery", "images", [])} 
+        <RoomGallery
+          images={[...getTaggedImages("gallery"), ...getJson("gallery", "images", [])]}
         />
       </div>
 

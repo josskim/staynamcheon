@@ -2,8 +2,14 @@ export const revalidate = 60;
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cafe Namcheon",
-  description: "숲속에 자리 잡은 미니멀한 카페, 카페 남천입니다. 정성스럽게 내린 커피와 시각을 사로잡는 풍경을 함께 즐기세요.",
+  title: "카페 남천",
+  description: "경산 숲속에 자리 잡은 미니멀 카페 남천입니다. 핸드드립 커피와 시즌 음료, 스테이 남천만의 뷰를 즐겨보세요.",
+  alternates: { canonical: "https://staynamcheon.com/cafe" },
+  openGraph: {
+    title: "카페 남천 | 스테이 남천",
+    description: "경산 숲속 미니멀 카페 남천. 핸드드립 커피와 자연 뷰.",
+    images: [{ url: "/images/lovable/cafe.jpg", width: 1200, height: 630, alt: "카페 남천" }],
+  },
 };
 
 import Hero from "@/components/Hero";
@@ -62,12 +68,23 @@ export default async function CafePage() {
     ]
   });
 
-  const cafeGallery = getJson("gallery", "images", [
+  const cafeGalleryLegacy = getJson("gallery", "images", [
     { src: "/videos/movie.mp4", alt: "Cafe vibe video" },
     { src: "/images/lovable/cafe.jpg", alt: "Cafe interior" },
     { src: "/images/lovable/gallery1.jpg", alt: "Coffee brewing" },
     { src: "/images/lovable/gallery2.jpg", alt: "Pastry detail" },
   ]);
+
+  // Also fetch new tagged gallery items
+  const taggedItems = await prisma.stayGalleryItem.findMany({
+    where: { isVisible: true, pages: { contains: "cafe>gallery" } },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+  const taggedGallery = taggedItems.map((item: any) => ({
+    src: item.videoUrl || item.imageUrl,
+    alt: item.title || item.description || "",
+  }));
+  const cafeGallery = [...taggedGallery, ...cafeGalleryLegacy];
 
   return (
     <main className="min-h-screen bg-background pb-20">

@@ -2,8 +2,14 @@ export const revalidate = 60;
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pension",
-  description: "스테이 남천의 프리미엄 독채 객실을 소개합니다. 자연과 조화를 이루는 감성적인 공간에서 진정한 휴식을 즐겨보세요.",
+  title: "펜션 객실",
+  description: "스테이 남천의 경산 독채 펜션 객실을 소개합니다. 201호·202호 프리미엄 객실에서 자연과 조화를 이루는 감성적인 공간을 경험하세요.",
+  alternates: { canonical: "https://staynamcheon.com/pension" },
+  openGraph: {
+    title: "펜션 객실 | 스테이 남천",
+    description: "경산 독채 펜션 스테이 남천 객실 안내. 201호·202호 프리미엄 객실.",
+    images: [{ url: "/images/lovable/pension.jpg", width: 1200, height: 630, alt: "스테이 남천 펜션 객실" }],
+  },
 };
 
 import Hero from "@/components/Hero";
@@ -36,7 +42,7 @@ export default async function PensionPage() {
     backgroundImage: getVal("hero", "imageUrl", "/images/hero.png")
   };
 
-  const rooms = getJson("rooms", "list", [
+  const roomsRaw = getJson("rooms", "list", [
     {
       name: "2F Room 201",
       description: "2 Rooms — Spacious suite with mountain views and modern amenities.",
@@ -48,7 +54,32 @@ export default async function PensionPage() {
     }
   ]);
 
-  const galleryImages = getJson("gallery", "images", [
+  // Fetch all tagged pension items (both gallery and room sections)
+  const allTaggedPension = await prisma.stayGalleryItem.findMany({
+    where: { isVisible: true, pages: { contains: "pension>" } },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+
+  const getTaggedBySection = (section: string) =>
+    allTaggedPension
+      .filter((item: any) => {
+        try { return JSON.parse(item.pages || "[]").includes(`pension>${section}`); } catch { return false; }
+      })
+      .map((item: any) => ({ src: item.videoUrl || item.imageUrl, alt: item.title || "", type: item.type }));
+
+  // Merge tagged room images into each room's gallery
+  // Extract room number from name e.g. "2F Room 201" → "201"
+  const rooms = roomsRaw.map((room: any) => {
+    const match = room.name?.match(/\b(\d{3})\b/);
+    const roomKey = match ? match[1] : null;
+    const tagged = roomKey ? getTaggedBySection(roomKey) : [];
+    return {
+      ...room,
+      gallery: [...(room.gallery || [{ src: room.image }]), ...tagged],
+    };
+  });
+
+  const galleryLegacy = getJson("gallery", "images", [
     { src: "/images/lovable/gallery1.jpg", alt: "Living space" },
     { src: "/images/lovable/gallery2.jpg", alt: "Bedroom detail" },
     { src: "/images/lovable/gallery3.jpg", alt: "Outdoor view" },
@@ -56,6 +87,11 @@ export default async function PensionPage() {
     { src: "/images/lovable/cafe.jpg", alt: "In-house cafe" },
     { src: "/images/lovable/campnic.jpg", alt: "Camping experience" }
   ]);
+  // pension>gallery → tagged images appear FIRST in bottom gallery
+  const galleryImages = [
+    ...getTaggedBySection("gallery"),
+    ...galleryLegacy,
+  ];
 
   return (
     <main className="min-h-screen bg-background pb-20">

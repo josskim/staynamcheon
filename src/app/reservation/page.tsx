@@ -2,8 +2,14 @@ export const revalidate = 60;
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Reservation",
-  description: "스테이 남천 예약 안내 및 이용 규정을 확인하세요. 온전한 휴식을 위한 정성 어린 안내가 준비되어 있습니다.",
+  title: "예약 안내",
+  description: "스테이 남천 예약 안내 및 이용 규정을 확인하세요. 경산 독채 펜션, 캠프닉 예약 문의는 전화 또는 카카오톡으로 연락주세요.",
+  alternates: { canonical: "https://staynamcheon.com/reservation" },
+  openGraph: {
+    title: "예약 안내 | 스테이 남천",
+    description: "스테이 남천 예약 안내. 경산 독채 펜션·캠프닉 예약 문의.",
+    images: [{ url: "/images/lovable/hero.jpg", width: 1200, height: 630, alt: "스테이 남천 예약 안내" }],
+  },
 };
 
 import Hero from "@/components/Hero";

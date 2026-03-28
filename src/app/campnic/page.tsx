@@ -2,8 +2,14 @@ export const revalidate = 60;
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Campnic",
-  description: "복잡한 준비 없이 즐기는 자연 속의 여유, 스테이 남천의 캠프닉입니다. 당일 글램핑과 피크닉으로 특별한 추억을 만드세요.",
+  title: "캠프닉",
+  description: "경산 글램핑·피크닉 캠프닉. 복잡한 준비 없이 즐기는 자연 속의 여유, 스테이 남천 캠프닉에서 특별한 당일 추억을 만드세요.",
+  alternates: { canonical: "https://staynamcheon.com/campnic" },
+  openGraph: {
+    title: "캠프닉 | 스테이 남천",
+    description: "경산 글램핑·피크닉. 스테이 남천 캠프닉에서 당일 특별한 추억을.",
+    images: [{ url: "/images/lovable/campnic.jpg", width: 1200, height: 630, alt: "스테이 남천 캠프닉" }],
+  },
 };
 
 import Hero from "@/components/Hero";
@@ -72,12 +78,20 @@ export default async function CampnicPage() {
   ]);
   const extraNote = getVal("extra", "note", "추가 요금은 현장에서 계좌이체 또는 현금 결제만 가능하며, 시간 연장은 사전 확인 후 가능합니다.");
 
-  const campnicGallery = getJson("gallery", "images", [
+  const campnicGalleryLegacy = getJson("gallery", "images", [
     { src: "/images/lovable/campnic.jpg", alt: "Campnic area outdoors" },
     { src: "/images/lovable/gallery1.jpg", alt: "Cozy tent interior" },
     { src: "/images/lovable/gallery3.jpg", alt: "Sunset at campnic" },
     { src: "/images/lovable/pension.jpg", alt: "View from campnic" },
   ]);
+  const taggedCampnic = await prisma.stayGalleryItem.findMany({
+    where: { isVisible: true, pages: { contains: "campnic>gallery" } },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+  const campnicGallery = [
+    ...taggedCampnic.map((item: any) => ({ src: item.videoUrl || item.imageUrl, alt: item.title || "" })),
+    ...campnicGalleryLegacy,
+  ];
 
   const amenityIcons = [Thermometer, Tv, Coffee];
 
