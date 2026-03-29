@@ -3,8 +3,12 @@ import prisma from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const fromParam = searchParams.get("from"); // YYYY-MM-DD
+    const toParam = searchParams.get("to");     // YYYY-MM-DD
+
     const now = new Date();
 
     // Start of today (UTC)
@@ -21,10 +25,36 @@ export async function GET() {
     // Start of this month
     const startOfMonth = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
 
-    // 30 days ago
+    // 30 days ago (default chart range)
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setUTCDate(thirtyDaysAgo.getUTCDate() - 29);
     thirtyDaysAgo.setUTCHours(0, 0, 0, 0);
+
+    // Custom date range filter (KST → UTC: KST = UTC+9)
+    let customFrom: Date | null = null;
+    let customTo: Date | null = null;
+    if (fromParam) {
+      // fromParam is YYYY-MM-DD in KST, convert to UTC midnight
+      customFrom = new Date(fromParam + "T00:00:00+09:00");
+    }
+    if (toParam) {
+      // toParam end of day KST
+      customTo = new Date(toParam + "T23:59:59+09:00");
+    }
+    const hasFilter = !!(customFrom || customTo);
+
+    const rangeWhere = hasFilter
+      ? {
+          createdAt: {
+            ...(customFrom ? { gte: customFrom } : {}),
+            ...(customTo ? { lte: customTo } : {}),
+          },
+        }
+      : {};
+
+    // Chart range
+    const chartFrom = customFrom ?? thirtyDaysAgo;
+    const chartTo = customTo ?? now;
 
     // Run all queries in parallel
     const [
@@ -32,7 +62,8 @@ export async function GET() {
       weekCount,
       monthCount,
       totalCount,
-      last30Views,
+      rangeCount,
+      chartViews,
       topPagesRaw,
       topReferrersRaw,
       devicesRaw,
@@ -44,39 +75,51 @@ export async function GET() {
       prisma.pageView.count({ where: { createdAt: { gte: startOfWeek } } }),
       prisma.pageView.count({ where: { createdAt: { gte: startOfMonth } } }),
       prisma.pageView.count(),
+      hasFilter ? prisma.pageView.count({ where: rangeWhere }) : Promise.resolve(null),
       prisma.pageView.findMany({
-        where: { createdAt: { gte: thirtyDaysAgo } },
+        where: {
+          createdAt: {
+            gte: chartFrom,
+            lte: chartTo,
+          },
+        },
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
       prisma.pageView.groupBy({
         by: ["path"],
+        where: rangeWhere,
         _count: { path: true },
         orderBy: { _count: { path: "desc" } },
         take: 10,
       }),
       prisma.pageView.groupBy({
         by: ["referrerDomain"],
+        where: rangeWhere,
         _count: { referrerDomain: true },
         orderBy: { _count: { referrerDomain: "desc" } },
         take: 10,
       }),
       prisma.pageView.groupBy({
         by: ["device"],
+        where: rangeWhere,
         _count: { device: true },
         orderBy: { _count: { device: "desc" } },
       }),
       prisma.pageView.groupBy({
         by: ["browser"],
+        where: rangeWhere,
         _count: { browser: true },
         orderBy: { _count: { browser: "desc" } },
       }),
       prisma.pageView.groupBy({
         by: ["os"],
+        where: rangeWhere,
         _count: { os: true },
         orderBy: { _count: { os: "desc" } },
       }),
       prisma.pageView.findMany({
+        where: rangeWhere,
         select: {
           path: true,
           referrerDomain: true,
@@ -86,19 +129,26 @@ export async function GET() {
           createdAt: true,
         },
         orderBy: { createdAt: "desc" },
-        take: 50,
+        take: 100,
       }),
     ]);
 
-    // Build daily chart: last 30 days
+    // Build daily chart within range
     const dailyMap: Record<string, number> = {};
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(thirtyDaysAgo);
+    const diffDays = Math.ceil((chartTo.getTime() - chartFrom.getTime()) / (1000 * 60 * 60 * 24));
+    const totalDays = Math.min(Math.max(diffDays, 1), 90);
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(chartFrom);
       d.setUTCDate(d.getUTCDate() + i);
       const key = d.toISOString().slice(0, 10);
       dailyMap[key] = 0;
     }
-    for (const v of last30Views) {
+    // Also ensure today's date is included when no filter
+    if (!hasFilter) {
+      const todayKey = now.toISOString().slice(0, 10);
+      if (!(todayKey in dailyMap)) dailyMap[todayKey] = 0;
+    }
+    for (const v of chartViews) {
       const key = v.createdAt.toISOString().slice(0, 10);
       if (key in dailyMap) {
         dailyMap[key]++;
@@ -147,6 +197,8 @@ export async function GET() {
       thisWeek: weekCount,
       thisMonth: monthCount,
       total: totalCount,
+      rangeCount,
+      hasFilter,
       daily,
       topPages,
       topReferrers,

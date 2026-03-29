@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, TrendingUp, Calendar, BarChart2, Globe } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Loader2, TrendingUp, Calendar, BarChart2, Globe, Filter, X } from "lucide-react";
 
 interface DailyData {
   date: string;
@@ -13,6 +13,8 @@ interface AnalyticsData {
   thisWeek: number;
   thisMonth: number;
   total: number;
+  rangeCount: number | null;
+  hasFilter: boolean;
   daily: DailyData[];
   topPages: { path: string; count: number }[];
   topReferrers: { domain: string; count: number }[];
@@ -77,13 +79,29 @@ function formatChartDate(iso: string) {
   return `${month}/${day}`;
 }
 
+function getTodayKST() {
+  const now = new Date();
+  // KST = UTC+9
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0, 10);
+}
+
 export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<DateRange>(30);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [appliedFrom, setAppliedFrom] = useState("");
+  const [appliedTo, setAppliedTo] = useState("");
 
-  useEffect(() => {
-    fetch("/api/admin/analytics")
+  const fetchData = useCallback((from: string, to: string) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const url = `/api/admin/analytics${params.toString() ? "?" + params.toString() : ""}`;
+    fetch(url)
       .then((r) => r.json())
       .then((d: any) => {
         if (d && Array.isArray(d.daily)) {
@@ -93,6 +111,35 @@ export default function AnalyticsDashboard() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchData("", "");
+  }, [fetchData]);
+
+  const handleApplyFilter = () => {
+    setAppliedFrom(dateFrom);
+    setAppliedTo(dateTo);
+    fetchData(dateFrom, dateTo);
+  };
+
+  const handleReset = () => {
+    setDateFrom("");
+    setDateTo("");
+    setAppliedFrom("");
+    setAppliedTo("");
+    fetchData("", "");
+  };
+
+  const handleFromToday = () => {
+    const today = getTodayKST();
+    setDateFrom(today);
+    setDateTo("");
+    setAppliedFrom(today);
+    setAppliedTo("");
+    fetchData(today, "");
+  };
+
+  const isFiltered = !!(appliedFrom || appliedTo);
 
   if (loading) {
     return (
@@ -110,8 +157,8 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  // Filter daily chart by range
-  const filteredDaily = (data.daily ?? []).slice(-range);
+  // Filter daily chart by range (only when no custom date filter)
+  const filteredDaily = isFiltered ? (data.daily ?? []) : (data.daily ?? []).slice(-range);
   const maxCount = Math.max(...filteredDaily.map((d) => d.count), 1);
 
   const totalDevices = (data.devices ?? []).reduce((s, d) => s + d.count, 0);
@@ -127,40 +174,83 @@ export default function AnalyticsDashboard() {
   const browserColors = ["#DB5461", "#4F8EF7", "#F7C04F", "#5CB87A", "#A78BFA", "#F97316"];
   const osColors = ["#DB5461", "#4F8EF7", "#F7C04F", "#5CB87A", "#A78BFA", "#F97316"];
 
-  const summaryCards = [
-    {
-      label: "오늘",
-      value: data.today,
-      icon: Calendar,
-      bg: "bg-rose-50",
-      accent: "#DB5461",
-      iconBg: "bg-rose-100",
-    },
-    {
-      label: "이번주",
-      value: data.thisWeek,
-      icon: TrendingUp,
-      bg: "bg-blue-50",
-      accent: "#4F8EF7",
-      iconBg: "bg-blue-100",
-    },
-    {
-      label: "이번달",
-      value: data.thisMonth,
-      icon: BarChart2,
-      bg: "bg-amber-50",
-      accent: "#F7A84F",
-      iconBg: "bg-amber-100",
-    },
-    {
-      label: "전체",
-      value: data.total,
-      icon: Globe,
-      bg: "bg-green-50",
-      accent: "#5CB87A",
-      iconBg: "bg-green-100",
-    },
-  ];
+  const summaryCards = isFiltered
+    ? [
+        {
+          label: "선택 기간",
+          value: data.rangeCount ?? 0,
+          icon: Filter,
+          bg: "bg-purple-50",
+          accent: "#A78BFA",
+          iconBg: "bg-purple-100",
+          sublabel: `${appliedFrom || "~"}${appliedTo ? " ~ " + appliedTo : " 이후"}`,
+        },
+        {
+          label: "오늘",
+          value: data.today,
+          icon: Calendar,
+          bg: "bg-rose-50",
+          accent: "#DB5461",
+          iconBg: "bg-rose-100",
+          sublabel: null,
+        },
+        {
+          label: "이번주",
+          value: data.thisWeek,
+          icon: TrendingUp,
+          bg: "bg-blue-50",
+          accent: "#4F8EF7",
+          iconBg: "bg-blue-100",
+          sublabel: null,
+        },
+        {
+          label: "전체",
+          value: data.total,
+          icon: Globe,
+          bg: "bg-green-50",
+          accent: "#5CB87A",
+          iconBg: "bg-green-100",
+          sublabel: null,
+        },
+      ]
+    : [
+        {
+          label: "오늘",
+          value: data.today,
+          icon: Calendar,
+          bg: "bg-rose-50",
+          accent: "#DB5461",
+          iconBg: "bg-rose-100",
+          sublabel: null,
+        },
+        {
+          label: "이번주",
+          value: data.thisWeek,
+          icon: TrendingUp,
+          bg: "bg-blue-50",
+          accent: "#4F8EF7",
+          iconBg: "bg-blue-100",
+          sublabel: null,
+        },
+        {
+          label: "이번달",
+          value: data.thisMonth,
+          icon: BarChart2,
+          bg: "bg-amber-50",
+          accent: "#F7A84F",
+          iconBg: "bg-amber-100",
+          sublabel: null,
+        },
+        {
+          label: "전체",
+          value: data.total,
+          icon: Globe,
+          bg: "bg-green-50",
+          accent: "#5CB87A",
+          iconBg: "bg-green-100",
+          sublabel: null,
+        },
+      ];
 
   return (
     <div className="space-y-10">
@@ -172,6 +262,60 @@ export default function AnalyticsDashboard() {
         <p className="text-[#856669] mt-2 font-medium">
           방문자 통계 및 페이지 분석
         </p>
+      </div>
+
+      {/* Date Filter */}
+      <div className="bg-white rounded-3xl border border-[#e4dcdd] p-6">
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-[#856669] uppercase tracking-widest">
+              시작일
+            </label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="border border-[#e4dcdd] rounded-xl px-4 py-2 text-sm text-[#171212] focus:outline-none focus:border-[#DB5461]"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-[#856669] uppercase tracking-widest">
+              종료일
+            </label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="border border-[#e4dcdd] rounded-xl px-4 py-2 text-sm text-[#171212] focus:outline-none focus:border-[#DB5461]"
+            />
+          </div>
+          <button
+            onClick={handleApplyFilter}
+            className="px-5 py-2 bg-[#DB5461] text-white rounded-xl text-sm font-medium hover:bg-[#c44452] transition-colors"
+          >
+            검색
+          </button>
+          <button
+            onClick={handleFromToday}
+            className="px-5 py-2 bg-[#f8f6f6] text-[#171212] rounded-xl text-sm font-medium hover:bg-[#f0ecec] transition-colors border border-[#e4dcdd]"
+          >
+            오늘부터
+          </button>
+          {isFiltered && (
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-1 px-4 py-2 bg-[#f8f6f6] text-[#856669] rounded-xl text-sm font-medium hover:bg-[#f0ecec] transition-colors"
+            >
+              <X size={14} />
+              초기화
+            </button>
+          )}
+        </div>
+        {isFiltered && (
+          <p className="mt-3 text-sm text-[#A78BFA] font-medium">
+            필터 적용 중: {appliedFrom || "전체"} ~ {appliedTo || "현재"}
+          </p>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -190,6 +334,11 @@ export default function AnalyticsDashboard() {
             <p className="text-3xl font-bold text-[#171212] mt-1">
               {card.value.toLocaleString()}
             </p>
+            {card.sublabel && (
+              <p className="text-xs text-[#A78BFA] mt-1 font-medium truncate">
+                {card.sublabel}
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -198,21 +347,23 @@ export default function AnalyticsDashboard() {
       <div className="bg-white rounded-3xl border border-[#e4dcdd] p-8">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <h2 className="text-xl font-bold text-[#171212]">일별 방문수</h2>
-          <div className="flex gap-2">
-            {([7, 30, 90] as DateRange[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  range === r
-                    ? "bg-[#DB5461] text-white"
-                    : "bg-[#f8f6f6] text-[#856669] hover:bg-[#f0ecec]"
-                }`}
-              >
-                {r}일
-              </button>
-            ))}
-          </div>
+          {!isFiltered && (
+            <div className="flex gap-2">
+              {([7, 30, 90] as DateRange[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRange(r)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    range === r
+                      ? "bg-[#DB5461] text-white"
+                      : "bg-[#f8f6f6] text-[#856669] hover:bg-[#f0ecec]"
+                  }`}
+                >
+                  {r}일
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex items-end gap-1 h-48 overflow-x-auto pb-2">
@@ -228,7 +379,7 @@ export default function AnalyticsDashboard() {
                 >
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-[#171212] text-white text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    {d.count}
+                    {d.date}: {d.count}건
                   </div>
                 </div>
               </div>
@@ -369,7 +520,14 @@ export default function AnalyticsDashboard() {
 
       {/* Recent Visits */}
       <div className="bg-white rounded-3xl border border-[#e4dcdd] p-8">
-        <h2 className="text-xl font-bold text-[#171212] mb-6">최근 방문</h2>
+        <h2 className="text-xl font-bold text-[#171212] mb-6">
+          접속 로그
+          {isFiltered && (
+            <span className="ml-3 text-sm font-normal text-[#A78BFA]">
+              ({data.recentViews?.length ?? 0}건)
+            </span>
+          )}
+        </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
