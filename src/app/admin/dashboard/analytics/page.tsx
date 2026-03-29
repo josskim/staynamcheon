@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Loader2, TrendingUp, Calendar, BarChart2, Globe, Filter, X } from "lucide-react";
+import { Loader2, TrendingUp, Calendar, BarChart2, Globe, Filter } from "lucide-react";
+import DateRangePicker from "@/components/admin/DateRangePicker";
 
 interface DailyData {
   date: string;
@@ -31,7 +32,7 @@ interface AnalyticsData {
   }[];
 }
 
-type DateRange = 7 | 30 | 90;
+type ChartRange = 7 | 30 | 90;
 
 function PercentBar({
   label,
@@ -79,19 +80,10 @@ function formatChartDate(iso: string) {
   return `${month}/${day}`;
 }
 
-function getTodayKST() {
-  const now = new Date();
-  // KST = UTC+9
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().slice(0, 10);
-}
-
 export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<DateRange>(30);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [range, setRange] = useState<ChartRange>(30);
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
 
@@ -115,29 +107,6 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     fetchData("", "");
   }, [fetchData]);
-
-  const handleApplyFilter = () => {
-    setAppliedFrom(dateFrom);
-    setAppliedTo(dateTo);
-    fetchData(dateFrom, dateTo);
-  };
-
-  const handleReset = () => {
-    setDateFrom("");
-    setDateTo("");
-    setAppliedFrom("");
-    setAppliedTo("");
-    fetchData("", "");
-  };
-
-  const handleFromToday = () => {
-    const today = getTodayKST();
-    setDateFrom(today);
-    setDateTo("");
-    setAppliedFrom(today);
-    setAppliedTo("");
-    fetchData(today, "");
-  };
 
   const isFiltered = !!(appliedFrom || appliedTo);
 
@@ -265,56 +234,20 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Date Filter */}
-      <div className="bg-white rounded-3xl border border-[#e4dcdd] p-6">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-[#856669] uppercase tracking-widest">
-              시작일
-            </label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="border border-[#e4dcdd] rounded-xl px-4 py-2 text-sm text-[#171212] focus:outline-none focus:border-[#DB5461]"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-[#856669] uppercase tracking-widest">
-              종료일
-            </label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="border border-[#e4dcdd] rounded-xl px-4 py-2 text-sm text-[#171212] focus:outline-none focus:border-[#DB5461]"
-            />
-          </div>
-          <button
-            onClick={handleApplyFilter}
-            className="px-5 py-2 bg-[#DB5461] text-white rounded-xl text-sm font-medium hover:bg-[#c44452] transition-colors"
-          >
-            검색
-          </button>
-          <button
-            onClick={handleFromToday}
-            className="px-5 py-2 bg-[#f8f6f6] text-[#171212] rounded-xl text-sm font-medium hover:bg-[#f0ecec] transition-colors border border-[#e4dcdd]"
-          >
-            오늘부터
-          </button>
-          {isFiltered && (
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-1 px-4 py-2 bg-[#f8f6f6] text-[#856669] rounded-xl text-sm font-medium hover:bg-[#f0ecec] transition-colors"
-            >
-              <X size={14} />
-              초기화
-            </button>
-          )}
-        </div>
+      <div className="flex items-center gap-3 flex-wrap">
+        <DateRangePicker
+          from={appliedFrom}
+          to={appliedTo}
+          onChange={(f: string, t: string) => {
+            setAppliedFrom(f);
+            setAppliedTo(t);
+            fetchData(f, t);
+          }}
+        />
         {isFiltered && (
-          <p className="mt-3 text-sm text-[#A78BFA] font-medium">
-            필터 적용 중: {appliedFrom || "전체"} ~ {appliedTo || "현재"}
-          </p>
+          <span className="text-sm text-[#A78BFA] font-medium">
+            필터 적용 중
+          </span>
         )}
       </div>
 
@@ -349,7 +282,7 @@ export default function AnalyticsDashboard() {
           <h2 className="text-xl font-bold text-[#171212]">일별 방문수</h2>
           {!isFiltered && (
             <div className="flex gap-2">
-              {([7, 30, 90] as DateRange[]).map((r) => (
+              {([7, 30, 90] as ChartRange[]).map((r) => (
                 <button
                   key={r}
                   onClick={() => setRange(r)}
