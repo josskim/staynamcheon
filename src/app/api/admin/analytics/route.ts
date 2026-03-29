@@ -10,25 +10,38 @@ export async function GET(req: Request) {
     const toParam = searchParams.get("to");     // YYYY-MM-DD
 
     const now = new Date();
+    const KST = 9 * 60 * 60 * 1000; // UTC+9 offset in ms
 
-    // Start of today (UTC)
-    const startOfToday = new Date(now);
-    startOfToday.setUTCHours(0, 0, 0, 0);
+    // Helper: KST 자정을 UTC Date로 반환
+    const kstMidnight = (d: Date): Date => {
+      // d를 KST 날짜로 변환 후 그 날 0시 KST = (0시 KST - 9시간) UTC
+      const kstMs = d.getTime() + KST;
+      const kstDate = new Date(kstMs);
+      kstDate.setUTCHours(0, 0, 0, 0); // KST 날짜의 자정 (UTC 기준으로는 이 숫자)
+      return new Date(kstDate.getTime() - KST); // 다시 UTC로
+    };
 
-    // Start of this week (Monday)
-    const startOfWeek = new Date(now);
-    const dayOfWeek = startOfWeek.getUTCDay(); // 0=Sun
+    // Start of today (KST 기준 오늘 0시)
+    const startOfToday = kstMidnight(now);
+
+    // Start of this week Monday (KST 기준)
+    const nowKst = new Date(now.getTime() + KST);
+    const dayOfWeek = nowKst.getUTCDay(); // 0=Sun
     const diffToMonday = (dayOfWeek + 6) % 7;
-    startOfWeek.setUTCDate(startOfWeek.getUTCDate() - diffToMonday);
-    startOfWeek.setUTCHours(0, 0, 0, 0);
+    const startOfWeekKst = new Date(nowKst);
+    startOfWeekKst.setUTCDate(startOfWeekKst.getUTCDate() - diffToMonday);
+    startOfWeekKst.setUTCHours(0, 0, 0, 0);
+    const startOfWeek = new Date(startOfWeekKst.getTime() - KST);
 
-    // Start of this month
-    const startOfMonth = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
+    // Start of this month (KST 기준 1일 0시)
+    const startOfMonthKst = new Date(Date.UTC(nowKst.getUTCFullYear(), nowKst.getUTCMonth(), 1));
+    const startOfMonth = new Date(startOfMonthKst.getTime() - KST);
 
-    // 30 days ago (default chart range)
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setUTCDate(thirtyDaysAgo.getUTCDate() - 29);
-    thirtyDaysAgo.setUTCHours(0, 0, 0, 0);
+    // 30 days ago (KST 기준)
+    const thirtyDaysAgoKst = new Date(nowKst);
+    thirtyDaysAgoKst.setUTCDate(thirtyDaysAgoKst.getUTCDate() - 29);
+    thirtyDaysAgoKst.setUTCHours(0, 0, 0, 0);
+    const thirtyDaysAgo = new Date(thirtyDaysAgoKst.getTime() - KST);
 
     // Custom date range filter (KST → UTC: KST = UTC+9)
     let customFrom: Date | null = null;
@@ -140,16 +153,18 @@ export async function GET(req: Request) {
     for (let i = 0; i < totalDays; i++) {
       const d = new Date(chartFrom);
       d.setUTCDate(d.getUTCDate() + i);
-      const key = d.toISOString().slice(0, 10);
+      // KST 기준 날짜 key
+      const key = new Date(d.getTime() + KST).toISOString().slice(0, 10);
       dailyMap[key] = 0;
     }
-    // Also ensure today's date is included when no filter
+    // Also ensure today's date is included when no filter (KST 기준)
     if (!hasFilter) {
-      const todayKey = now.toISOString().slice(0, 10);
+      const todayKey = new Date(now.getTime() + KST).toISOString().slice(0, 10);
       if (!(todayKey in dailyMap)) dailyMap[todayKey] = 0;
     }
     for (const v of chartViews) {
-      const key = v.createdAt.toISOString().slice(0, 10);
+      // createdAt을 KST 기준 날짜로 변환
+      const key = new Date(v.createdAt.getTime() + KST).toISOString().slice(0, 10);
       if (key in dailyMap) {
         dailyMap[key]++;
       }
