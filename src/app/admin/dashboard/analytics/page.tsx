@@ -15,6 +15,11 @@ interface AnalyticsData {
   thisMonth: number;
   total: number;
   rangeCount: number | null;
+  uniqueToday: number;
+  uniqueWeek: number;
+  uniqueMonth: number;
+  uniqueTotal: number;
+  uniqueRange: number | null;
   hasFilter: boolean;
   daily: DailyData[];
   topPages: { path: string; count: number }[];
@@ -148,6 +153,7 @@ export default function AnalyticsDashboard() {
         {
           label: "선택 기간",
           value: data.rangeCount ?? 0,
+          unique: data.uniqueRange ?? 0,
           icon: Filter,
           bg: "bg-purple-50",
           accent: "#A78BFA",
@@ -157,6 +163,7 @@ export default function AnalyticsDashboard() {
         {
           label: "오늘",
           value: data.today,
+          unique: data.uniqueToday,
           icon: Calendar,
           bg: "bg-rose-50",
           accent: "#DB5461",
@@ -166,6 +173,7 @@ export default function AnalyticsDashboard() {
         {
           label: "이번주",
           value: data.thisWeek,
+          unique: data.uniqueWeek,
           icon: TrendingUp,
           bg: "bg-blue-50",
           accent: "#4F8EF7",
@@ -175,6 +183,7 @@ export default function AnalyticsDashboard() {
         {
           label: "전체",
           value: data.total,
+          unique: data.uniqueTotal,
           icon: Globe,
           bg: "bg-green-50",
           accent: "#5CB87A",
@@ -186,6 +195,7 @@ export default function AnalyticsDashboard() {
         {
           label: "오늘",
           value: data.today,
+          unique: data.uniqueToday,
           icon: Calendar,
           bg: "bg-rose-50",
           accent: "#DB5461",
@@ -195,6 +205,7 @@ export default function AnalyticsDashboard() {
         {
           label: "이번주",
           value: data.thisWeek,
+          unique: data.uniqueWeek,
           icon: TrendingUp,
           bg: "bg-blue-50",
           accent: "#4F8EF7",
@@ -204,6 +215,7 @@ export default function AnalyticsDashboard() {
         {
           label: "이번달",
           value: data.thisMonth,
+          unique: data.uniqueMonth,
           icon: BarChart2,
           bg: "bg-amber-50",
           accent: "#F7A84F",
@@ -213,6 +225,7 @@ export default function AnalyticsDashboard() {
         {
           label: "전체",
           value: data.total,
+          unique: data.uniqueTotal,
           icon: Globe,
           bg: "bg-green-50",
           accent: "#5CB87A",
@@ -266,6 +279,9 @@ export default function AnalyticsDashboard() {
             </p>
             <p className="text-3xl font-bold text-[#171212] mt-1">
               {card.value.toLocaleString()}
+            </p>
+            <p className="text-xs text-[#856669] mt-1.5">
+              순방문자 <span className="font-semibold text-[#171212]">{card.unique.toLocaleString()}</span>명
             </p>
             {card.sublabel && (
               <p className="text-xs text-[#A78BFA] mt-1 font-medium truncate">

@@ -69,6 +69,15 @@ export async function GET(req: Request) {
     const chartFrom = customFrom ?? thirtyDaysAgo;
     const chartTo = customTo ?? now;
 
+    // Helper: count distinct ipHash
+    const countUnique = async (where: object) => {
+      const rows = await prisma.pageView.groupBy({
+        by: ["ipHash"],
+        where: { ...where, ipHash: { not: null } },
+      });
+      return rows.length;
+    };
+
     // Run all queries in parallel
     const [
       todayCount,
@@ -76,6 +85,11 @@ export async function GET(req: Request) {
       monthCount,
       totalCount,
       rangeCount,
+      uniqueToday,
+      uniqueWeek,
+      uniqueMonth,
+      uniqueTotal,
+      uniqueRange,
       chartViews,
       topPagesRaw,
       topReferrersRaw,
@@ -89,6 +103,11 @@ export async function GET(req: Request) {
       prisma.pageView.count({ where: { createdAt: { gte: startOfMonth } } }),
       prisma.pageView.count(),
       hasFilter ? prisma.pageView.count({ where: rangeWhere }) : Promise.resolve(null),
+      countUnique({ createdAt: { gte: startOfToday } }),
+      countUnique({ createdAt: { gte: startOfWeek } }),
+      countUnique({ createdAt: { gte: startOfMonth } }),
+      countUnique({}),
+      hasFilter ? countUnique(rangeWhere) : Promise.resolve(null),
       prisma.pageView.findMany({
         where: {
           createdAt: {
@@ -213,6 +232,11 @@ export async function GET(req: Request) {
       thisMonth: monthCount,
       total: totalCount,
       rangeCount,
+      uniqueToday,
+      uniqueWeek,
+      uniqueMonth,
+      uniqueTotal,
+      uniqueRange,
       hasFilter,
       daily,
       topPages,
