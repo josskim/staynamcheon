@@ -55,9 +55,12 @@ export async function PUT(
     });
 
     return NextResponse.json(story);
-  } catch (error) {
-    console.error("Failed to update story:", error);
-    return NextResponse.json({ error: "Failed to update story" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Story Update Error:", error);
+    return NextResponse.json(
+      { error: "Failed to update story", details: error?.message || String(error) },
+      { status: 500 }
+    );
   }
 }
 

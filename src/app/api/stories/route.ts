@@ -59,10 +59,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(story, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create story:", error);
+  } catch (error: any) {
+    console.error("Story Create Error:", error);
     return NextResponse.json(
-      { error: "Failed to create story" },
+      { error: "Failed to create story", details: error?.message || String(error) },
       { status: 500 }
     );
   }

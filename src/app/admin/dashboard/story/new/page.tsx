@@ -55,15 +55,17 @@ export default function NewStoryPage() {
         })
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         router.push("/admin/dashboard/story");
         router.refresh();
       } else {
-        throw new Error("Failed to create story");
+        throw new Error(data.details || data.error || "스토리 등록에 실패했습니다.");
       }
     } catch (err) {
       console.error(err);
-      alert("스토리 등록 중 오류가 발생했습니다.");
+      alert(err instanceof Error ? err.message : "스토리 등록 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
