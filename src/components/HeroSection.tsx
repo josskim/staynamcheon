@@ -61,7 +61,7 @@ const HeroSection = ({ content }: { content?: any }) => {
           {content?.subtitle || "A Retreat into Nature"}
         </motion.p>
         <motion.h1
-          className="font-display text-6xl md:text-8xl lg:text-9xl xl:text-[11rem] text-primary-foreground font-normal tracking-wide leading-none"
+          className="font-display text-6xl md:text-8xl lg:text-9xl xl:text-[11rem] text-primary-foreground font-normal tracking-tight leading-none"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 1.2, ease: "easeOut" }}

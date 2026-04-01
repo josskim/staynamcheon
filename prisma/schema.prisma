@@ -101,3 +101,16 @@ model PageView {
   @@index([referrerDomain])
   @@map("page_views")
 }
+
+model StayStory {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  images      String?  // JSON array of image URLs
+  tags        String?  // JSON array of tags, e.g. ["#스테이남천", "#벚꽃놀이"]
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("stay_stories")
+}

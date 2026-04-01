@@ -13,6 +13,7 @@ const navItems = [
   { label: "Other", href: "/other" },
   { label: "Gallery", href: "/gallery" },
   { label: "Reservation", href: "/reservation" },
+  { label: "Story", href: "/story" },
 ];
 
 const Navigation = () => {
