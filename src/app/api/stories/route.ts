@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
+export const maxDuration = 60;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

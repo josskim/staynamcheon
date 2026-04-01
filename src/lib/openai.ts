@@ -1,8 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(API_KEY);
-
 export const FOOTER_HTML_TEMPLATE = `
   <div class="mt-20 pt-16 border-t border-gray-200">
     <div class="text-center mb-12">
@@ -71,10 +68,12 @@ const SYSTEM_PROMPT = `
 `;
 
 export async function generateStoryHtml(prompt: string, images: string[] = []): Promise<{ title: string, content: string }> {
-  if (!process.env.GEMINI_API_KEY) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not set');
   }
 
+  const genAI = new GoogleGenerativeAI(apiKey);
   const systemContent = SYSTEM_PROMPT.replace('%%%FOOTER_MARKER%%%', FOOTER_HTML_TEMPLATE);
   
   const userPrompt = `
