@@ -14,7 +14,8 @@ import {
   Compass,
   CalendarDays,
   Image as ImageIcon,
-  BarChart2
+  BarChart2,
+  PieChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
@@ -35,6 +36,7 @@ const ICON_MAP: Record<string, any> = {
   CalendarDays,
   Image: ImageIcon,
   BarChart2,
+  PieChart,
   Settings,
 };
 

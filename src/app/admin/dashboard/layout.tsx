@@ -42,7 +42,8 @@ export default async function AdminDashboardLayout({
     { name: "Reservation", icon: "CalendarDays", href: "/admin/dashboard/reservation" },
     { name: "Gallery", icon: "Image", href: "/admin/dashboard/gallery" },
     { name: "Story", icon: "FileText", href: "/admin/dashboard/story" },
-    { name: "Analytics", icon: "BarChart2", href: "/admin/dashboard/analytics" },
+    { name: "Site Logs", icon: "BarChart2", href: "/admin/dashboard/analytics" },
+    { name: "Google Analytics", icon: "PieChart", href: "/admin/dashboard/google-analytics" },
     { name: "Settings", icon: "Settings", href: "/admin/dashboard/settings" },
   ];
 

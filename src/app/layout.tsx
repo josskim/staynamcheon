@@ -76,6 +76,7 @@ export const metadata: Metadata = {
   },
 };
 
+import { GoogleAnalytics } from "@next/third-parties/google";
 import AppLayoutControls from "@/components/AppLayoutControls";
 import Analytics from "@/components/Analytics";
 
@@ -113,6 +114,9 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
         <Analytics />
         <AppLayoutControls>
           {children}
