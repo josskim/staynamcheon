@@ -393,13 +393,20 @@ export default function AdminChatPage() {
                               }`}
                             >
                               <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                              <p
-                                className={`text-[10px] mt-1 ${
-                                  msg.senderType === "admin" ? "text-white/60" : "text-[#856669]"
-                                }`}
-                              >
-                                {formatTime(msg.createdAt)}
-                              </p>
+                              <div className={`flex items-center gap-1.5 mt-1 ${msg.senderType === "admin" ? "justify-end" : ""}`}>
+                                <span
+                                  className={`text-[10px] ${
+                                    msg.senderType === "admin" ? "text-white/60" : "text-[#856669]"
+                                  }`}
+                                >
+                                  {formatTime(msg.createdAt)}
+                                </span>
+                                {msg.senderType === "admin" && (
+                                  <span className={`text-[10px] ${msg.isRead ? "text-white/80" : "text-white/40"}`}>
+                                    {msg.isRead ? "읽음" : "안읽음"}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}

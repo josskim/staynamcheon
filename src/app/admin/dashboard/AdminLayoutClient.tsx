@@ -99,7 +99,7 @@ export default function AdminLayoutClient({
   // Service Worker 등록 + 알림 상태 확인
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/admin/sw.js").catch(() => {});
     }
 
     // PWA 설치 가능 여부 캡처

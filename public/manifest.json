@@ -4,6 +4,10 @@
   "description": "스테이 남천 관리자 패널",
   "start_url": "/admin/dashboard",
   "scope": "/admin/",
+  "serviceworker": {
+    "src": "/admin/sw.js",
+    "scope": "/admin/"
+  },
   "display": "standalone",
   "background_color": "#f8f6f6",
   "theme_color": "#DB5461",

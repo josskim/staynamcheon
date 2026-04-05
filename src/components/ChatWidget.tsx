@@ -233,13 +233,20 @@ export default function ChatWidget() {
                       <p className="text-[10px] font-bold text-[#DB5461] mb-1">스테이남천</p>
                     )}
                     <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                    <p
-                      className={`text-[10px] mt-1 ${
-                        msg.senderType === "visitor" ? "text-white/60" : "text-[#856669]"
-                      }`}
-                    >
-                      {formatTime(msg.createdAt)}
-                    </p>
+                    <div className={`flex items-center gap-1.5 mt-1 ${msg.senderType === "visitor" ? "justify-end" : ""}`}>
+                      <span
+                        className={`text-[10px] ${
+                          msg.senderType === "visitor" ? "text-white/60" : "text-[#856669]"
+                        }`}
+                      >
+                        {formatTime(msg.createdAt)}
+                      </span>
+                      {msg.senderType === "visitor" && (
+                        <span className={`text-[10px] ${msg.isRead ? "text-white/80" : "text-white/40"}`}>
+                          {msg.isRead ? "읽음" : "안읽음"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
