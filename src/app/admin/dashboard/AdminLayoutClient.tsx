@@ -18,7 +18,6 @@ import {
   PieChart,
   MessageCircle,
   Download,
-  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
@@ -54,8 +53,6 @@ export default function AdminLayoutClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [showPushBanner, setShowPushBanner] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevUnreadRef = useRef<number>(-1);
 
@@ -64,6 +61,34 @@ export default function AdminLayoutClient({
     audioRef.current = new Audio("/notification.mp3");
     audioRef.current.volume = 0.7;
   }, []);
+
+  // 자동 push 구독 (배너 없이)
+  const autoSubscribePush = async () => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    try {
+      // 권한이 default면 자동 요청
+      if ("Notification" in window && Notification.permission === "default") {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") return;
+      }
+      if ("Notification" in window && Notification.permission !== "granted") return;
+
+      const reg = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      const subscription = existing || await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+
+      await fetch("/api/admin/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: subscription.toJSON() }),
+      });
+    } catch (err) {
+      console.error("Auto push subscribe error:", err);
+    }
+  };
 
   // 전역 새 메시지 폴링 (어느 admin 페이지에서든 알림음 재생)
   useEffect(() => {
@@ -75,6 +100,14 @@ export default function AdminLayoutClient({
         const totalUnread = data.rooms.reduce((sum: number, r: any) => sum + r.unreadCount, 0);
         if (prevUnreadRef.current >= 0 && totalUnread > prevUnreadRef.current) {
           audioRef.current?.play().catch(() => {});
+          // 앱 뱃지 업데이트
+          if ("setAppBadge" in navigator) {
+            (navigator as any).setAppBadge(totalUnread).catch(() => {});
+          }
+        }
+        // unread 0이면 뱃지 클리어
+        if (totalUnread === 0 && "clearAppBadge" in navigator) {
+          (navigator as any).clearAppBadge().catch(() => {});
         }
         prevUnreadRef.current = totalUnread;
       } catch {}
@@ -96,7 +129,7 @@ export default function AdminLayoutClient({
     return () => navigator.serviceWorker?.removeEventListener("message", handler);
   }, []);
 
-  // Service Worker 등록 + 알림 상태 확인
+  // Service Worker 등록 + PWA 감지 + 자동 push 구독
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/admin/sw.js").catch(() => {});
@@ -114,16 +147,8 @@ export default function AdminLayoutClient({
       setIsInstalled(true);
     }
 
-    // 알림 권한 상태 확인 → 미허용이면 배너 표시
-    if ("Notification" in window) {
-      if (Notification.permission === "granted") {
-        setPushEnabled(true);
-      } else if (Notification.permission === "default") {
-        // 3초 후에 배너 표시 (바로 뜨면 무시당하기 쉬움)
-        const timer = setTimeout(() => setShowPushBanner(true), 3000);
-        return () => { clearTimeout(timer); window.removeEventListener("beforeinstallprompt", handler); };
-      }
-    }
+    // 자동 push 구독 (배너 없이)
+    autoSubscribePush();
 
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
@@ -136,39 +161,6 @@ export default function AdminLayoutClient({
       setIsInstalled(true);
     }
     setDeferredPrompt(null);
-  };
-
-  const handleEnablePush = async () => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      alert("이 브라우저에서는 푸시 알림을 지원하지 않습니다.");
-      setShowPushBanner(false);
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      setShowPushBanner(false);
-      return;
-    }
-
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-      });
-
-      await fetch("/api/admin/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscription: subscription.toJSON() }),
-      });
-
-      setPushEnabled(true);
-    } catch (err) {
-      console.error("Push subscribe error:", err);
-    }
-    setShowPushBanner(false);
   };
 
   return (
@@ -255,35 +247,6 @@ export default function AdminLayoutClient({
             </div>
           </div>
         </header>
-
-        {/* 알림 허용 배너 */}
-        {showPushBanner && !pushEnabled && (
-          <div className="mx-4 md:mx-12 mt-4 flex items-center justify-between gap-4 bg-[#DB5461] text-white px-6 py-4 rounded-2xl shadow-lg animate-in slide-in-from-top-4 fade-in duration-500">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                <Bell size={20} />
-              </div>
-              <div>
-                <p className="font-bold text-sm">채팅 알림을 켜시겠습니까?</p>
-                <p className="text-xs opacity-80 mt-0.5">고객 문의가 오면 즉시 알림을 받을 수 있습니다.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleEnablePush}
-                className="px-4 py-2 bg-white text-[#DB5461] text-sm font-bold rounded-xl hover:bg-white/90 transition-colors"
-              >
-                허용
-              </button>
-              <button
-                onClick={() => setShowPushBanner(false)}
-                className="px-3 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
-              >
-                나중에
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="p-4 md:p-12">
           {children}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import prisma from "@/lib/db";
-import { sendPushToAdmin } from "@/lib/push";
+import { sendPushToAdmin, sendPushToVisitor } from "@/lib/push";
 
 // GET: 메시지 목록 (폴링)
 export async function GET(req: NextRequest) {
@@ -103,6 +103,21 @@ export async function POST(req: NextRequest) {
         `${room?.visitor.nickname}: ${content.trim().slice(0, 50)}`,
         `/admin/dashboard/chat?room=${roomId}`
       ).catch(() => {});
+    }
+
+    // 관리자가 보낸 메시지면 방문자에게 푸시
+    if (sender === "admin") {
+      const room = await prisma.chatRoom.findUnique({
+        where: { id: roomId },
+        select: { visitorId: true },
+      });
+      if (room) {
+        sendPushToVisitor(
+          room.visitorId,
+          "스테이 남천",
+          content.trim().slice(0, 100)
+        ).catch(() => {});
+      }
     }
 
     return NextResponse.json({ ok: true, message });

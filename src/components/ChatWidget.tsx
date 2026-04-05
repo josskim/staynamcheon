@@ -25,15 +25,47 @@ export default function ChatWidget() {
   const lastFetchRef = useRef<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 알림음 초기화
+  // SW 등록 + 알림음 초기화
   useEffect(() => {
     audioRef.current = new Audio("/notification.mp3");
     audioRef.current.volume = 0.6;
+
+    // 홈페이지 SW 등록
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    // SW 메시지 수신 → 알림음 재생
+    const onSWMessage = (event: MessageEvent) => {
+      if (event.data?.type === "NEW_CHAT_MESSAGE") {
+        audioRef.current?.play().catch(() => {});
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", onSWMessage);
+    return () => navigator.serviceWorker?.removeEventListener("message", onSWMessage);
   }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // 방문자 push 구독 (permission granted 후 자동)
+  const subscribePush = useCallback(async () => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      const subscription = existing || await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+      await fetch("/api/chat/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: subscription.toJSON() }),
+      });
+    } catch {}
+  }, []);
 
   // 채팅 초기화
   const initChat = useCallback(async () => {
@@ -45,13 +77,21 @@ export default function ChatWidget() {
       if (data.ok) {
         setRoomId(data.roomId);
         setNickname(data.nickname);
+        // 알림 권한 요청 + 구독
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission().then((p) => {
+            if (p === "granted") subscribePush();
+          });
+        } else if ("Notification" in window && Notification.permission === "granted") {
+          subscribePush();
+        }
       }
     } catch {
       // ignore
     } finally {
       setInitializing(false);
     }
-  }, [roomId]);
+  }, [roomId, subscribePush]);
 
   // 메시지 가져오기
   const fetchMessages = useCallback(async (rid: string, isInitial?: boolean) => {
@@ -125,10 +165,14 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
-  // 위젯 열면 unread 초기화 + 읽음 처리
+  // 위젯 열면 unread 초기화 + 읽음 처리 + 뱃지 클리어
   useEffect(() => {
     if (open && roomId) {
       setUnread(0);
+      // 앱 뱃지 클리어
+      if ("clearAppBadge" in navigator) {
+        (navigator as any).clearAppBadge().catch(() => {});
+      }
       fetch("/api/chat/read", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

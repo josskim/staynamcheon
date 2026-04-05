@@ -8,22 +8,35 @@ if (VAPID_PUBLIC && VAPID_PRIVATE) {
   webPush.setVapidDetails("mailto:admin@staynamcheon.com", VAPID_PUBLIC, VAPID_PRIVATE);
 }
 
-export async function sendPushToAdmin(title: string, body: string, url?: string) {
-  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
-
-  const subs = await prisma.adminPushSubscription.findMany();
-  const payload = JSON.stringify({ title, body, url: url || "/admin/dashboard/chat" });
-
-  const results = await Promise.allSettled(
+async function sendPush(
+  subs: { id: string; endpoint: string; p256dh: string; auth: string }[],
+  payload: string,
+  deleteStale: (id: string) => Promise<void>
+) {
+  return Promise.allSettled(
     subs.map((sub) =>
       webPush
         .sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload)
         .catch(async (err) => {
           if (err.statusCode === 410 || err.statusCode === 404) {
-            await prisma.adminPushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
+            await deleteStale(sub.id).catch(() => {});
           }
         })
     )
   );
-  return results;
+}
+
+export async function sendPushToAdmin(title: string, body: string, url?: string) {
+  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
+  const subs = await prisma.adminPushSubscription.findMany();
+  const payload = JSON.stringify({ title, body, url: url || "/admin/dashboard/chat" });
+  return sendPush(subs, payload, (id) => prisma.adminPushSubscription.delete({ where: { id } }));
+}
+
+export async function sendPushToVisitor(visitorId: string, title: string, body: string) {
+  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
+  const subs = await prisma.visitorPushSubscription.findMany({ where: { visitorId } });
+  if (subs.length === 0) return;
+  const payload = JSON.stringify({ title, body, url: "/" });
+  return sendPush(subs, payload, (id) => prisma.visitorPushSubscription.delete({ where: { id } }));
 }

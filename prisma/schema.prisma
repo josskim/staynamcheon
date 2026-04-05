@@ -121,11 +121,12 @@ model StayStory {
 // ============================================================
 
 model ChatVisitor {
-  id        String   @id @default(cuid())
-  token     String   @unique            // UUID cookie
-  nickname  String                      // 자동생성 "0405_1423"
-  createdAt DateTime @default(now())
-  room      ChatRoom?
+  id                String   @id @default(cuid())
+  token             String   @unique            // UUID cookie
+  nickname          String                      // 자동생성 "0405_1423"
+  createdAt         DateTime @default(now())
+  room              ChatRoom?
+  pushSubscriptions VisitorPushSubscription[]
 
   @@map("chat_visitors")
 }
@@ -156,6 +157,19 @@ model ChatMessage {
 
   @@index([roomId, createdAt])
   @@map("chat_messages")
+}
+
+model VisitorPushSubscription {
+  id        String   @id @default(cuid())
+  visitorId String   @map("visitor_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  visitor   ChatVisitor @relation(fields: [visitorId], references: [id])
+
+  @@map("visitor_push_subscriptions")
 }
 
 model AdminPushSubscription {

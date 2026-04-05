@@ -25,6 +25,11 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(
     self.registration.showNotification(title, options).then(() => {
+      // 앱 아이콘 뱃지
+      if (self.navigator && self.navigator.setAppBadge) {
+        self.navigator.setAppBadge();
+      }
+      // 열려있는 admin 탭에 알림음 트리거
       return self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
         for (const client of clients) {
           if (client.url.includes("/admin")) {
@@ -38,6 +43,12 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+
+  // 뱃지 클리어
+  if (self.navigator && self.navigator.clearAppBadge) {
+    self.navigator.clearAppBadge();
+  }
+
   const url = event.notification.data?.url || "/admin/dashboard/chat";
 
   event.waitUntil(
