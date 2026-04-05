@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navigation from "./Navigation";
 import FloatingContact from "./FloatingContact";
+import ChatWidget from "./ChatWidget";
 
 export default function AppLayoutControls({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function AppLayoutControls({ children }: { children: React.ReactN
       <Navigation />
       {children}
       <FloatingContact />
+      <ChatWidget />
     </>
   );
 }

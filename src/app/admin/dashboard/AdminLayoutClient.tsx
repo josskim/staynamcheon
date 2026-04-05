@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Menu,
@@ -15,7 +15,9 @@ import {
   CalendarDays,
   Image as ImageIcon,
   BarChart2,
-  PieChart
+  PieChart,
+  MessageCircle,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
@@ -37,6 +39,7 @@ const ICON_MAP: Record<string, any> = {
   Image: ImageIcon,
   BarChart2,
   PieChart,
+  MessageCircle,
   Settings,
 };
 
@@ -48,8 +51,45 @@ export default function AdminLayoutClient({
   menuItems: MenuItem[];
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  // Service Worker 등록 (PWA 푸시 알림용)
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    // PWA 설치 가능 여부 캡처
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+
+    // 이미 설치된 경우 감지
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
+    }
+
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome === "accepted") {
+      setIsInstalled(true);
+    }
+    setDeferredPrompt(null);
+  };
 
   return (
+    <>
+      {/* PWA manifest */}
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#DB5461" />
     <div className="flex min-h-screen bg-[#f8f6f6]">
       {/* Sidebar Backdrop Mobile */}
       {isSidebarOpen && (
@@ -94,7 +134,16 @@ export default function AdminLayoutClient({
           })}
         </nav>
 
-        <div className="p-4 border-t border-[#f4f1f1]">
+        <div className="p-4 border-t border-[#f4f1f1] space-y-1">
+          {!isInstalled && deferredPrompt && (
+            <button
+              onClick={handleInstall}
+              className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-[#DB5461] rounded-xl transition-all hover:bg-rose-50 group"
+            >
+              <Download size={18} className="group-hover:scale-110 transition-transform" />
+              앱 설치하기
+            </button>
+          )}
           <LogoutButton />
         </div>
       </aside>
@@ -127,5 +176,6 @@ export default function AdminLayoutClient({
         </div>
       </main>
     </div>
+    </>
   );
 }
