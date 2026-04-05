@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +20,10 @@ import {
 
 import { LogoutButton } from "./LogoutButton";
 import AdminLayoutClient from "./AdminLayoutClient";
+
+export const metadata: Metadata = {
+  manifest: "/admin/manifest.json",
+};
 
 export default async function AdminDashboardLayout({
   children,

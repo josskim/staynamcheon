@@ -173,8 +173,7 @@ export default function AdminLayoutClient({
 
   return (
     <>
-      {/* PWA manifest */}
-      <link rel="manifest" href="/manifest.json" />
+      {/* theme-color for PWA */}
       <meta name="theme-color" content="#DB5461" />
     <div className="flex min-h-screen bg-[#f8f6f6]">
       {/* Sidebar Backdrop Mobile */}
