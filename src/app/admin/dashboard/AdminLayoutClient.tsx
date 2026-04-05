@@ -53,6 +53,7 @@ export default function AdminLayoutClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [unreadChat, setUnreadChat] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevUnreadRef = useRef<number>(-1);
 
@@ -113,6 +114,7 @@ export default function AdminLayoutClient({
           // SW의 badgeCount도 리셋
           navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_BADGE" });
         }
+        setUnreadChat(totalUnread);
         prevUnreadRef.current = totalUnread;
       } catch {}
     };
@@ -242,6 +244,17 @@ export default function AdminLayoutClient({
             <h2 className="text-lg md:text-xl font-bold text-[#171212] whitespace-nowrap">Management Portal</h2>
           </div>
           <div className="flex items-center gap-4">
+            <Link
+              href="/admin/dashboard/chat"
+              className="relative w-10 h-10 bg-[#f8f6f6] rounded-full border border-[#e4dcdd] flex items-center justify-center text-[#856669] hover:text-[#DB5461] hover:border-[#DB5461] transition-colors"
+            >
+              <MessageCircle size={20} />
+              {unreadChat > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#DB5461] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {unreadChat}
+                </span>
+              )}
+            </Link>
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-[#171212]">Administrator</p>
               <p className="text-[10px] text-[#856669] uppercase tracking-widest">Master Admin</p>
