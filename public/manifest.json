@@ -1,0 +1,17 @@
+{
+  "id": "/homepage",
+  "name": "스테이남천",
+  "short_name": "스테이남천",
+  "description": "경산 프리미엄 독채 펜션 스테이 남천",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
