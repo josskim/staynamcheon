@@ -23,6 +23,13 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastFetchRef = useRef<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 알림음 초기화
+  useEffect(() => {
+    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current.volume = 0.6;
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,10 +79,11 @@ export default function ChatWidget() {
         lastFetchRef.current = data.messages[data.messages.length - 1].createdAt;
       }
 
-      // 위젯이 닫혀있을 때 admin 메시지 unread 카운트
+      // admin 메시지 수신 시 알림음 + unread 카운트
       if (!isInitial && data.messages.length > 0) {
         const adminNew = data.messages.filter((m: Message) => m.senderType === "admin");
         if (adminNew.length > 0) {
+          audioRef.current?.play().catch(() => {});
           setUnread((prev) => prev + adminNew.length);
         }
       }
@@ -222,7 +230,7 @@ export default function ChatWidget() {
                     }`}
                   >
                     {msg.senderType === "admin" && (
-                      <p className="text-[10px] font-bold text-[#DB5461] mb-1">관리자</p>
+                      <p className="text-[10px] font-bold text-[#DB5461] mb-1">스테이남천</p>
                     )}
                     <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                     <p

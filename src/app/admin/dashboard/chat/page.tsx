@@ -64,6 +64,13 @@ export default function AdminChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastFetchRef = useRef<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 알림음 초기화
+  useEffect(() => {
+    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current.volume = 0.6;
+  }, []);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -101,6 +108,14 @@ export default function AdminChatPage() {
 
       if (data.messages.length > 0) {
         lastFetchRef.current = data.messages[data.messages.length - 1].createdAt;
+      }
+
+      // 방문자 메시지 수신 시 알림음
+      if (!initial && data.messages.length > 0) {
+        const visitorNew = data.messages.filter((m: Message) => m.senderType === "visitor");
+        if (visitorNew.length > 0) {
+          audioRef.current?.play().catch(() => {});
+        }
       }
     } catch {}
   }, []);
