@@ -173,6 +173,7 @@ export default function ChatWidget() {
       if ("clearAppBadge" in navigator) {
         (navigator as any).clearAppBadge().catch(() => {});
       }
+      navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_BADGE" });
       fetch("/api/chat/read", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

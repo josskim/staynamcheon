@@ -106,8 +106,12 @@ export default function AdminLayoutClient({
           }
         }
         // unread 0이면 뱃지 클리어
-        if (totalUnread === 0 && "clearAppBadge" in navigator) {
-          (navigator as any).clearAppBadge().catch(() => {});
+        if (totalUnread === 0) {
+          if ("clearAppBadge" in navigator) {
+            (navigator as any).clearAppBadge().catch(() => {});
+          }
+          // SW의 badgeCount도 리셋
+          navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_BADGE" });
         }
         prevUnreadRef.current = totalUnread;
       } catch {}
