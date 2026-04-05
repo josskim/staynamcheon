@@ -108,6 +108,7 @@ model StayStory {
   content     String   @db.Text
   images      String?  // JSON array of image URLs
   tags        String?  // JSON array of tags, e.g. ["#스테이남천", "#벚꽃놀이"]
+  views       Int      @default(0)
   isVisible   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

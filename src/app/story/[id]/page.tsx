@@ -35,8 +35,9 @@ export default async function StoryDetailPage(props: { params: Promise<{ id: str
   const params = await props.params;
   const id = params?.id;
   
-  const story = await prisma.stayStory.findUnique({
-    where: { id }
+  const story = await prisma.stayStory.update({
+    where: { id },
+    data: { views: { increment: 1 } }
   });
 
   if (!story) {

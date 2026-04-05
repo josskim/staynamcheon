@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Menu,
@@ -56,6 +56,45 @@ export default function AdminLayoutClient({
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const prevUnreadRef = useRef<number>(-1);
+
+  // 알림음 초기화
+  useEffect(() => {
+    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current.volume = 0.7;
+  }, []);
+
+  // 전역 새 메시지 폴링 (어느 admin 페이지에서든 알림음 재생)
+  useEffect(() => {
+    const checkUnread = async () => {
+      try {
+        const res = await fetch("/api/admin/chat/rooms");
+        const data = await res.json();
+        if (!data.ok) return;
+        const totalUnread = data.rooms.reduce((sum: number, r: any) => sum + r.unreadCount, 0);
+        if (prevUnreadRef.current >= 0 && totalUnread > prevUnreadRef.current) {
+          audioRef.current?.play().catch(() => {});
+        }
+        prevUnreadRef.current = totalUnread;
+      } catch {}
+    };
+
+    checkUnread();
+    const interval = setInterval(checkUnread, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Service Worker 메시지 수신 → 즉시 알림음 재생
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "NEW_CHAT_MESSAGE") {
+        audioRef.current?.play().catch(() => {});
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handler);
+    return () => navigator.serviceWorker?.removeEventListener("message", handler);
+  }, []);
 
   // Service Worker 등록 + 알림 상태 확인
   useEffect(() => {

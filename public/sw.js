@@ -22,7 +22,18 @@ self.addEventListener("push", (event) => {
     actions: [{ action: "open", title: "확인" }],
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(() => {
+      // 열려있는 admin 탭에 메시지를 보내서 커스텀 알림음 재생
+      return self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+        for (const client of clients) {
+          if (client.url.includes("/admin")) {
+            client.postMessage({ type: "NEW_CHAT_MESSAGE" });
+          }
+        }
+      });
+    })
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {

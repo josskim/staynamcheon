@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Edit, Trash2, Settings, Calendar, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Settings, Calendar, Eye, EyeOff, ClipboardCopy, Check } from "lucide-react";
 import { getThumbnailUrl, getVideoThumbnailUrl } from "@/lib/cloudinary";
 
 type Story = {
@@ -12,6 +12,7 @@ type Story = {
   content: string;
   images: string;
   tags: string;
+  views: number;
   isVisible: boolean;
   createdAt: string;
 };
@@ -65,6 +66,65 @@ export default function AdminStoryPage() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const [copyingId, setCopyingId] = useState<string | null>(null);
+
+  const copyForNaver = async (story: Story) => {
+    try {
+      const textContent = story.content
+        .replace(/<(br|p|div|li)[^>]*>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\n\s*\n/g, '\n\n')
+        .trim();
+      
+      let parsedImages: string[] = [];
+      try {
+        const firstParse = JSON.parse(story.images || "[]");
+        parsedImages = typeof firstParse === 'string' ? JSON.parse(firstParse) : firstParse;
+      } catch(e) {}
+
+      let parsedTags: string[] = [];
+      try {
+        const firstParse = JSON.parse(story.tags || "[]");
+        parsedTags = typeof firstParse === 'string' ? JSON.parse(firstParse) : firstParse;
+      } catch (e) {}
+
+      const imageGuide = parsedImages.length > 0 
+        ? `\n\n📸 [사용된 이미지 목록]\n${parsedImages.map((url, i) => `${i+1}. ${url}`).join('\n')}\n(포스팅 시 위 URL의 이미지를 적절한 위치에 삽입해주세요.)\n` 
+        : "";
+
+      const fullText = `제목: ${story.title}\n\n${textContent}${imageGuide}\n\n태그: ${parsedTags.join(' ')}`;
+      
+      // HTML 버전 생성 (네이버 에디터 등이 인식하도록 표준 HTML 구성)
+      const htmlContent = `
+        <div style="font-family: sans-serif; line-height: 1.6;">
+          <h1 style="font-size: 24px; font-weight: bold;">${story.title}</h1>
+          <div style="margin-top: 20px;">
+            ${story.content}
+          </div>
+          <div style="margin-top: 30px; color: #a1a1a1;">
+            ${parsedTags.map(t => `<span style="margin-right: 8px;">${t}</span>`).join('')}
+          </div>
+        </div>
+      `;
+
+      try {
+        const clipboardItem = new ClipboardItem({
+          "text/plain": new Blob([fullText], { type: "text/plain" }),
+          "text/html": new Blob([htmlContent], { type: "text/html" })
+        });
+        await navigator.clipboard.write([clipboardItem]);
+      } catch (err) {
+        // ClipboardItem 미지원 환경 대비 fallback
+        await navigator.clipboard.writeText(fullText);
+      }
+
+      setCopyingId(story.id);
+      setTimeout(() => setCopyingId(null), 2000);
+    } catch (err) {
+      alert("복사에 실패했습니다.");
     }
   };
 
@@ -173,7 +233,12 @@ export default function AdminStoryPage() {
                       <Calendar size={12} />
                       {new Date(story.createdAt).toLocaleDateString()}
                     </div>
-                    {/* Toggle Switch */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-[11px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                        <Eye size={10} />
+                        {story.views || 0}
+                      </div>
+                      {/* Toggle Switch */}
                     <label className="relative inline-flex items-center cursor-pointer" title={story.isVisible ? "숨기기" : "공개하기"}>
                       <input 
                         type="checkbox" 
@@ -184,6 +249,7 @@ export default function AdminStoryPage() {
                       <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                   </div>
+                </div>
                   
                   <h3 className="text-lg font-bold tracking-tight text-gray-900 mb-2 line-clamp-2">
                     <Link href={`/story/${story.id}`} target="_blank" className="hover:text-primary transition-colors">
@@ -199,6 +265,19 @@ export default function AdminStoryPage() {
                       미리보기
                     </Link>
                     <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => copyForNaver(story)}
+                        className={`p-1.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-all ${
+                          copyingId === story.id 
+                            ? "bg-green-50 text-green-600" 
+                            : "text-[#03c75a] hover:bg-[#03c75a]/5"
+                        }`}
+                        title="네이버 블로그용으로 복사"
+                      >
+                        {copyingId === story.id ? <Check size={14} /> : <ClipboardCopy size={14} />}
+                        {copyingId === story.id ? "복사됨" : "네이버 복사"}
+                      </button>
+                      <div className="w-px h-4 bg-gray-200 mx-1" />
                       <Link 
                         href={`/admin/dashboard/story/edit/${story.id}`}
                         className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
