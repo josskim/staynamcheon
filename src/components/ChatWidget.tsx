@@ -22,7 +22,6 @@ export default function ChatWidget() {
   const [unread, setUnread] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastFetchRef = useRef<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // SW 등록 + 알림음 초기화
@@ -93,40 +92,30 @@ export default function ChatWidget() {
     }
   }, [roomId, subscribePush]);
 
-  // 메시지 가져오기
+  // 메시지 가져오기 (매번 전체 fetch → isRead 상태 갱신)
   const fetchMessages = useCallback(async (rid: string, isInitial?: boolean) => {
     try {
       const params = new URLSearchParams({ roomId: rid });
-      if (!isInitial && lastFetchRef.current) {
-        params.set("after", lastFetchRef.current);
-      }
-
       const res = await fetch(`/api/chat/messages?${params}`);
       const data = await res.json();
       if (!data.ok) return;
 
-      if (isInitial) {
-        setMessages(data.messages);
-      } else if (data.messages.length > 0) {
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id));
-          const newMsgs = data.messages.filter((m: Message) => !existingIds.has(m.id));
-          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
-        });
-      }
+      const prevCount = isInitial ? 0 : undefined;
 
-      if (data.messages.length > 0) {
-        lastFetchRef.current = data.messages[data.messages.length - 1].createdAt;
-      }
+      setMessages((prev) => {
+        const prevIds = new Set(prev.map((m) => m.id));
+        const newAdminMsgs = isInitial ? [] : data.messages.filter(
+          (m: Message) => m.senderType === "admin" && !prevIds.has(m.id)
+        );
 
-      // admin 메시지 수신 시 알림음 + unread 카운트
-      if (!isInitial && data.messages.length > 0) {
-        const adminNew = data.messages.filter((m: Message) => m.senderType === "admin");
-        if (adminNew.length > 0) {
+        // 새 admin 메시지 수신 시 알림음 + unread
+        if (newAdminMsgs.length > 0) {
           audioRef.current?.play().catch(() => {});
-          setUnread((prev) => prev + adminNew.length);
+          setUnread((u) => u + newAdminMsgs.length);
         }
-      }
+
+        return data.messages;
+      });
     } catch {
       // ignore
     }
@@ -142,7 +131,6 @@ export default function ChatWidget() {
   // roomId 확보 후 초기 메시지 로드
   useEffect(() => {
     if (roomId && open) {
-      lastFetchRef.current = null;
       fetchMessages(roomId, true);
     }
   }, [roomId, open, fetchMessages]);
@@ -209,7 +197,6 @@ export default function ChatWidget() {
         setMessages((prev) =>
           prev.map((m) => (m.id === tempMsg.id ? data.message : m))
         );
-        lastFetchRef.current = data.message.createdAt;
       }
     } catch {
       // keep optimistic msg

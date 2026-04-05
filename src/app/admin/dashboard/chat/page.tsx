@@ -63,7 +63,6 @@ export default function AdminChatPage() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastFetchRef = useRef<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // 알림음 초기화
@@ -85,38 +84,27 @@ export default function AdminChatPage() {
     }
   }, []);
 
-  // 메시지 로드
+  // 메시지 로드 (매번 전체 fetch → isRead 상태 갱신)
   const fetchMessages = useCallback(async (rid: string, initial?: boolean) => {
     try {
       const params = new URLSearchParams({ roomId: rid });
-      if (!initial && lastFetchRef.current) {
-        params.set("after", lastFetchRef.current);
-      }
       const res = await fetch(`/api/chat/messages?${params}`);
       const data = await res.json();
       if (!data.ok) return;
 
-      if (initial) {
-        setMessages(data.messages);
-      } else if (data.messages.length > 0) {
-        setMessages((prev) => {
-          const ids = new Set(prev.map((m) => m.id));
-          const newMsgs = data.messages.filter((m: Message) => !ids.has(m.id));
-          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
-        });
-      }
+      setMessages((prev) => {
+        const prevIds = new Set(prev.map((m) => m.id));
+        const newVisitorMsgs = initial ? [] : data.messages.filter(
+          (m: Message) => m.senderType === "visitor" && !prevIds.has(m.id)
+        );
 
-      if (data.messages.length > 0) {
-        lastFetchRef.current = data.messages[data.messages.length - 1].createdAt;
-      }
-
-      // 방문자 메시지 수신 시 알림음
-      if (!initial && data.messages.length > 0) {
-        const visitorNew = data.messages.filter((m: Message) => m.senderType === "visitor");
-        if (visitorNew.length > 0) {
+        // 방문자 메시지 수신 시 알림음
+        if (newVisitorMsgs.length > 0) {
           audioRef.current?.play().catch(() => {});
         }
-      }
+
+        return data.messages;
+      });
     } catch {}
   }, []);
 
@@ -131,7 +119,6 @@ export default function AdminChatPage() {
   useEffect(() => {
     if (!selectedRoom) return;
     setLoadingMsgs(true);
-    lastFetchRef.current = null;
     fetchMessages(selectedRoom, true).then(() => setLoadingMsgs(false));
 
     // 읽음 처리
@@ -227,7 +214,6 @@ export default function AdminChatPage() {
       const data = await res.json();
       if (data.ok) {
         setMessages((prev) => prev.map((m) => (m.id === tempMsg.id ? data.message : m)));
-        lastFetchRef.current = data.message.createdAt;
       }
     } catch {} finally {
       setSending(false);
