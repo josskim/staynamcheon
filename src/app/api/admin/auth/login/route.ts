@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { setAdminSessionCookie } from "@/lib/admin-session";
 
 export const dynamic = "force-dynamic";
 
@@ -34,12 +35,7 @@ export async function POST(request: Request) {
     // 3. Session Management (Simplistic for now, using a cookie)
     // In a real app, use iron-session or next-auth
     const response = NextResponse.json({ success: true });
-    response.cookies.set("admin_session", admin.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 day
-      path: "/",
-    });
+    setAdminSessionCookie(response, String(admin.id));
 
     return response;
   } catch (error) {
