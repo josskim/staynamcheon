@@ -3,7 +3,7 @@
   "name": "\uc2a4\ud14c\uc774\ub0a8\ucc9c\uad00\ub9ac\uc790",
   "short_name": "\uc2a4\ud14c\uc774\ub0a8\ucc9c\uad00\ub9ac\uc790",
   "description": "\uc2a4\ud14c\uc774 \ub0a8\ucc9c \uad00\ub9ac\uc790 \ud328\ub110",
-  "start_url": "/admin/dashboard",
+  "start_url": "/admin/login",
   "scope": "/admin/",
   "display": "standalone",
   "background_color": "#f8f6f6",
