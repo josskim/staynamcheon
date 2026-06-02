@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/"],
       },
     ],
-    sitemap: "https://staynamcheon.com/sitemap.xml",
+    sitemap: "https://xn--q20b145avpd59fmvg.com/sitemap.xml",
   };
 }

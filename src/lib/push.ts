@@ -4,7 +4,10 @@ import prisma from "@/lib/db";
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
 const ADMIN_PUSH_ALLOWED_ORIGINS = new Set(
-  (process.env.ADMIN_PUSH_ALLOWED_ORIGINS || "https://staynamcheon.com,https://www.staynamcheon.com")
+  (
+    process.env.ADMIN_PUSH_ALLOWED_ORIGINS ||
+    "https://xn--q20b145avpd59fmvg.com,https://www.xn--q20b145avpd59fmvg.com"
+  )
     .split(",")
     .map((origin) => origin.trim().replace(/\/$/, ""))
     .filter(Boolean)

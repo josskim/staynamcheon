@@ -19,7 +19,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://staynamcheon.com"),
+  metadataBase: new URL("https://xn--q20b145avpd59fmvg.com"),
   title: {
     default: "스테이 남천 | 경산 프리미엄 독채 펜션",
     template: "%s | 스테이 남천"
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   creator: "Stay Namcheon",
   publisher: "Stay Namcheon",
   alternates: {
-    canonical: "https://staynamcheon.com",
+    canonical: "https://xn--q20b145avpd59fmvg.com",
   },
   formatDetection: {
     email: false,
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "스테이 남천 | 경산 프리미엄 독채 펜션",
     description: "도심 속 온전한 휴식, 경산 프리미엄 독채 펜션 스테이 남천입니다. 캠프닉·카페·부대시설까지.",
-    url: "https://staynamcheon.com",
+    url: "https://xn--q20b145avpd59fmvg.com",
     siteName: "스테이 남천",
     locale: "ko_KR",
     type: "website",
@@ -89,8 +89,8 @@ const jsonLd = {
   "@type": "LodgingBusiness",
   name: "스테이 남천",
   description: "경산 프리미엄 독채 펜션. 캠프닉, 카페, 다양한 부대시설을 갖춘 감성 숙소.",
-  url: "https://staynamcheon.com",
-  image: "https://staynamcheon.com/images/lovable/hero.jpg",
+  url: "https://xn--q20b145avpd59fmvg.com",
+  image: "https://xn--q20b145avpd59fmvg.com/images/lovable/hero.jpg",
   address: {
     "@type": "PostalAddress",
     addressRegion: "경상북도",

@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://staynamcheon.com";
+  const baseUrl = "https://xn--q20b145avpd59fmvg.com";
 
   return [
     {

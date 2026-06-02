@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "카페 남천",
   description: "경산 숲속에 자리 잡은 미니멀 카페 남천입니다. 핸드드립 커피와 시즌 음료, 스테이 남천만의 뷰를 즐겨보세요.",
-  alternates: { canonical: "https://staynamcheon.com/cafe" },
+  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/cafe" },
   openGraph: {
     title: "카페 남천 | 스테이 남천",
     description: "경산 숲속 미니멀 카페 남천. 핸드드립 커피와 자연 뷰.",

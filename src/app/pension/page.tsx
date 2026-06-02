@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "펜션 객실",
   description: "스테이 남천의 경산 독채 펜션 객실을 소개합니다. 201호·202호 프리미엄 객실에서 자연과 조화를 이루는 감성적인 공간을 경험하세요.",
-  alternates: { canonical: "https://staynamcheon.com/pension" },
+  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/pension" },
   openGraph: {
     title: "펜션 객실 | 스테이 남천",
     description: "경산 독채 펜션 스테이 남천 객실 안내. 201호·202호 프리미엄 객실.",

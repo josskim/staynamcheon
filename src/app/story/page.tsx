@@ -4,7 +4,7 @@ import StoryClient from "./StoryClient";
 export const metadata: Metadata = {
   title: "스토리",
   description: "스테이 남천의 다양한 이야기와 소식을 만나보세요.",
-  alternates: { canonical: "https://staynamcheon.com/story" },
+  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/story" },
   openGraph: {
     title: "스토리 | 스테이 남천",
     description: "스테이 남천의 다양한 이야기와 소식을 만나보세요.",

@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "예약 안내",
   description: "스테이 남천 예약 안내 및 이용 규정을 확인하세요. 경산 독채 펜션, 캠프닉 예약 문의는 전화 또는 카카오톡으로 연락주세요.",
-  alternates: { canonical: "https://staynamcheon.com/reservation" },
+  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/reservation" },
   openGraph: {
     title: "예약 안내 | 스테이 남천",
     description: "스테이 남천 예약 안내. 경산 독채 펜션·캠프닉 예약 문의.",
