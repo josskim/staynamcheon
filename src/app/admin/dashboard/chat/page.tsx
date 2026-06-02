@@ -51,6 +51,26 @@ function formatDate(iso: string) {
   });
 }
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+async function getAdminServiceWorkerRegistration() {
+  const registration = await navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" });
+  const worker = registration.installing || registration.waiting;
+  if (!registration.active && worker) {
+    await new Promise<void>((resolve) => {
+      worker.addEventListener("statechange", () => {
+        if (worker.state === "activated") resolve();
+      });
+    });
+  }
+  return registration;
+}
+
 export default function AdminChatPage() {
   const searchParams = useSearchParams();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -158,22 +178,20 @@ export default function AdminChatPage() {
       return;
     }
 
-    if (Notification.permission === "granted") {
-      alert("알림이 이미 활성화되어 있습니다.");
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      alert("알림 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.");
-      return;
+    if (Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        alert("알림 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.");
+        return;
+      }
     }
 
     try {
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.subscribe({
+      const reg = await getAdminServiceWorkerRegistration();
+      const existing = await reg.pushManager.getSubscription();
+      const subscription = existing || await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ""),
       });
 
       await fetch("/api/admin/push/subscribe", {

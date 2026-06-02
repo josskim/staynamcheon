@@ -20,7 +20,14 @@ async function sendPush(
         .catch(async (err) => {
           if (err.statusCode === 410 || err.statusCode === 404) {
             await deleteStale(sub.id).catch(() => {});
+            return;
           }
+          console.error("Push notification failed:", {
+            endpoint: sub.endpoint.slice(0, 80),
+            statusCode: err.statusCode,
+            body: err.body,
+            message: err.message,
+          });
         })
     )
   );

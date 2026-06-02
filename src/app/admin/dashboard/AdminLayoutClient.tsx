@@ -18,6 +18,8 @@ import {
   PieChart,
   MessageCircle,
   Download,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
@@ -43,6 +45,26 @@ const ICON_MAP: Record<string, any> = {
   Settings,
 };
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+async function getAdminServiceWorkerRegistration() {
+  const registration = await navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" });
+  const worker = registration.installing || registration.waiting;
+  if (!registration.active && worker) {
+    await new Promise<void>((resolve) => {
+      worker.addEventListener("statechange", () => {
+        if (worker.state === "activated") resolve();
+      });
+    });
+  }
+  return registration;
+}
+
 export default function AdminLayoutClient({
   children,
   menuItems
@@ -54,6 +76,7 @@ export default function AdminLayoutClient({
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [unreadChat, setUnreadChat] = useState(0);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevUnreadRef = useRef<number>(-1);
 
@@ -74,11 +97,11 @@ export default function AdminLayoutClient({
       }
       if ("Notification" in window && Notification.permission !== "granted") return;
 
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await getAdminServiceWorkerRegistration();
       const existing = await reg.pushManager.getSubscription();
       const subscription = existing || await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ""),
       });
 
       await fetch("/api/admin/push/subscribe", {
@@ -86,8 +109,49 @@ export default function AdminLayoutClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subscription: subscription.toJSON() }),
       });
+      setPushEnabled(true);
     } catch (err) {
       console.error("Auto push subscribe error:", err);
+    }
+  };
+
+  const handleEnablePush = async () => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+      alert("이 브라우저에서는 푸시 알림을 지원하지 않습니다.");
+      return;
+    }
+
+    try {
+      if (Notification.permission === "default") {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") {
+          alert("알림 권한이 필요합니다. 모바일 앱/브라우저 설정에서 알림을 허용해주세요.");
+          return;
+        }
+      }
+
+      if (Notification.permission !== "granted") {
+        alert("알림 권한이 필요합니다. 모바일 앱/브라우저 설정에서 알림을 허용해주세요.");
+        return;
+      }
+
+      const reg = await getAdminServiceWorkerRegistration();
+      const existing = await reg.pushManager.getSubscription();
+      const subscription = existing || await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ""),
+      });
+
+      await fetch("/api/admin/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: subscription.toJSON() }),
+      });
+      setPushEnabled(true);
+      alert("푸시 알림이 활성화되었습니다.");
+    } catch (err) {
+      console.error("Manual push subscribe error:", err);
+      alert("알림 등록 중 오류가 발생했습니다.");
     }
   };
 
@@ -138,7 +202,10 @@ export default function AdminLayoutClient({
   // Service Worker 등록 + PWA 감지 + 자동 push 구독
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/admin/sw.js").catch(() => {});
+      getAdminServiceWorkerRegistration().catch(() => {});
+      if ("Notification" in window) {
+        setPushEnabled(Notification.permission === "granted");
+      }
     }
 
     // PWA 설치 가능 여부 캡처
@@ -244,6 +311,19 @@ export default function AdminLayoutClient({
             <h2 className="text-lg md:text-xl font-bold text-[#171212] whitespace-nowrap">Management Portal</h2>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleEnablePush}
+              className={cn(
+                "w-10 h-10 rounded-full border flex items-center justify-center transition-colors",
+                pushEnabled
+                  ? "bg-green-50 border-green-200 text-green-700"
+                  : "bg-[#f8f6f6] border-[#e4dcdd] text-[#856669] hover:text-[#DB5461] hover:border-[#DB5461]"
+              )}
+              title={pushEnabled ? "푸시 알림 활성화됨" : "푸시 알림 켜기"}
+            >
+              {pushEnabled ? <Bell size={20} /> : <BellOff size={20} />}
+            </button>
             <Link
               href="/admin/dashboard/chat"
               className="relative w-10 h-10 bg-[#f8f6f6] rounded-full border border-[#e4dcdd] flex items-center justify-center text-[#856669] hover:text-[#DB5461] hover:border-[#DB5461] transition-colors"
