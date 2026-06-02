@@ -17,8 +17,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "스테이 남천";
   const options = {
     body: data.body || "새 메시지가 있습니다.",
-    icon: "/icon.png",
-    badge: "/icon.png",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
     vibrate: [200, 100, 200],
     data: { url: data.url || "/" },
   };

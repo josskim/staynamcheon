@@ -18,8 +18,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "스테이 남천";
   const options = {
     body: data.body || "새 알림이 있습니다.",
-    icon: "/icon.png",
-    badge: "/icon.png",
+    icon: "/admin/icons/icon-192.png",
+    badge: "/admin/icons/icon-192.png",
     vibrate: [200, 100, 200],
     data: { url: data.url || "/admin/dashboard/chat" },
     actions: [{ action: "open", title: "확인" }],

@@ -1,8 +1,8 @@
 {
   "id": "/admin/",
-  "name": "스테이남천관리자",
-  "short_name": "스테이남천관리자",
-  "description": "스테이 남천 관리자 패널",
+  "name": "\uc2a4\ud14c\uc774\ub0a8\ucc9c\uad00\ub9ac\uc790",
+  "short_name": "\uc2a4\ud14c\uc774\ub0a8\ucc9c\uad00\ub9ac\uc790",
+  "description": "\uc2a4\ud14c\uc774 \ub0a8\ucc9c \uad00\ub9ac\uc790 \ud328\ub110",
   "start_url": "/admin/dashboard",
   "scope": "/admin/",
   "display": "standalone",
@@ -11,20 +11,20 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/admin/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon.png",
+      "src": "/admin/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon.png",
-      "sizes": "192x192",
+      "src": "/admin/icons/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
