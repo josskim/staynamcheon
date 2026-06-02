@@ -98,11 +98,11 @@ export async function POST(req: NextRequest) {
         where: { id: roomId },
         include: { visitor: { select: { nickname: true } } },
       });
-      sendPushToAdmin(
+      await sendPushToAdmin(
         "새 채팅 문의",
         `${room?.visitor.nickname}: ${content.trim().slice(0, 50)}`,
         `/admin/dashboard/chat?room=${roomId}`
-      ).catch(() => {});
+      );
     }
 
     // 관리자가 보낸 메시지면 방문자에게 푸시
@@ -112,11 +112,11 @@ export async function POST(req: NextRequest) {
         select: { visitorId: true },
       });
       if (room) {
-        sendPushToVisitor(
+        await sendPushToVisitor(
           room.visitorId,
           "스테이 남천",
           content.trim().slice(0, 100)
-        ).catch(() => {});
+        );
       }
     }
 

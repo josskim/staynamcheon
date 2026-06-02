@@ -16,7 +16,11 @@ async function sendPush(
   return Promise.allSettled(
     subs.map((sub) =>
       webPush
-        .sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload)
+        .sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload,
+          { TTL: 60, urgency: "high" }
+        )
         .catch(async (err) => {
           if (err.statusCode === 410 || err.statusCode === 404) {
             await deleteStale(sub.id).catch(() => {});
