@@ -3,6 +3,12 @@ import prisma from "@/lib/db";
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
+const ADMIN_PUSH_ALLOWED_ORIGINS = new Set(
+  (process.env.ADMIN_PUSH_ALLOWED_ORIGINS || "https://staynamcheon.com,https://www.staynamcheon.com")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean)
+);
 
 if (VAPID_PUBLIC && VAPID_PRIVATE) {
   webPush.setVapidDetails("mailto:admin@staynamcheon.com", VAPID_PUBLIC, VAPID_PRIVATE);
@@ -37,9 +43,28 @@ async function sendPush(
   );
 }
 
+function isAllowedAdminOrigin(origin: string | null) {
+  if (!origin) return false;
+
+  const normalized = origin.trim().replace(/\/$/, "");
+  if (normalized === "stay") return false;
+
+  try {
+    const url = new URL(normalized);
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return false;
+  } catch {
+    return false;
+  }
+
+  return ADMIN_PUSH_ALLOWED_ORIGINS.has(normalized);
+}
+
 export async function sendPushToAdmin(title: string, body: string, url?: string) {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
-  const subs = await prisma.adminPushSubscription.findMany();
+  const subs = (await prisma.adminPushSubscription.findMany()).filter((sub) =>
+    isAllowedAdminOrigin(sub.adminId)
+  );
+  if (subs.length === 0) return;
   const payload = JSON.stringify({ title, body, url: url || "/admin/dashboard/chat" });
   return sendPush(subs, payload, (id) => prisma.adminPushSubscription.delete({ where: { id } }));
 }
