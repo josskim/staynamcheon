@@ -1,7 +1,15 @@
 const { Client } = require('pg');
 
+function requireEnv(key) {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`${key} is required`);
+  }
+  return value;
+}
+
 async function main() {
-  const connectionString = "postgresql://neondb_owner:npg_6NOnL3XWqCtf@ep-late-frost-a1dl7dc2-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+  const connectionString = requireEnv('DATABASE_URL');
   const client = new Client({ connectionString });
   
   try {

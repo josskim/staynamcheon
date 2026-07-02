@@ -1,7 +1,15 @@
 import { PrismaClient } from '@prisma/client'
 
+const requireEnv = (key) => {
+  const value = process.env[key]
+  if (!value) {
+    throw new Error(`${key} is required`)
+  }
+  return value
+}
+
 const prisma = new PrismaClient({
-  datasources: { db: { url: 'postgresql://neondb_owner:npg_etYKQh15ZuTR@ep-late-frost-a1dl7dc2-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require' } }
+  datasources: { db: { url: requireEnv('DATABASE_URL') } }
 })
 
 const count = await prisma.stayGalleryItem.count()

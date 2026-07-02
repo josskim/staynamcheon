@@ -2,6 +2,14 @@ const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
 
+function requireEnv(key) {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`${key} is required`);
+  }
+  return value;
+}
+
 // Basic .env loader (Disabled for isolated test)
 /*
 const env = fs.readFileSync(path.join(__dirname, '.env'), 'utf-8');
@@ -16,7 +24,7 @@ env.split('\n').forEach(line => {
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: "postgresql://neondb_owner:npg_6NOnL3XWqCtf@ep-late-frost-a1dl7dc2-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+      url: requireEnv('DATABASE_URL')
     }
   }
 });

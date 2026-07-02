@@ -3,14 +3,22 @@ import { PrismaClient } from "@prisma/client";
 
 const VIDEO_PATH = "C:\\Users\\youby\\.claude\\channels\\telegram\\inbox\\1774704330816-AgADeBwAAjnMQVY.mp4";
 
+const requireEnv = (key) => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`${key} is required`);
+  }
+  return value;
+};
+
 cloudinary.config({
-  cloud_name: "ddwzlwbt8",
-  api_key: "277488845234155",
-  api_secret: "HLwJdLF-D6afeCSpYg6tTehsctg",
+  cloud_name: requireEnv("CLOUDINARY_CLOUD_NAME"),
+  api_key: requireEnv("CLOUDINARY_API_KEY"),
+  api_secret: requireEnv("CLOUDINARY_API_SECRET"),
 });
 
 const prisma = new PrismaClient({
-  datasources: { db: { url: "postgresql://neondb_owner:npg_etYKQh15ZuTR@ep-late-frost-a1dl7dc2-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require" } }
+  datasources: { db: { url: requireEnv("DATABASE_URL") } }
 });
 
 async function main() {
