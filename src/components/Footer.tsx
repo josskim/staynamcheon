@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAVER_PLACE_URL, siteConfig } from "@/lib/site-config";
 
 const Footer = () => {
   return (
@@ -8,7 +9,7 @@ const Footer = () => {
           <h3 className="font-display text-2xl tracking-widest text-[#DB5461]">Stay Namcheon</h3>
           <div className="space-y-1">
             <p className="text-sm font-body leading-relaxed max-w-xs">
-              Stay Namcheon
+              경산 대형 단체 펜션 · 독채 · 면회 당일 이용 · 캠프닉
             </p>
             <p className="text-xs text-muted-foreground font-body leading-relaxed max-w-xs">
               경상북도 경산시 남천면 남천로 31 스테이남천
@@ -19,19 +20,24 @@ const Footer = () => {
           <div>
             <h4 className="text-xs font-body font-medium tracking-[0.2em] uppercase text-accent mb-6 border-b border-accent/20 pb-2">Explore</h4>
             <div className="flex flex-col gap-3">
-              <Link href="/pension" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pension</Link>
-              <Link href="/campnic" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Campnic</Link>
-              <Link href="/cafe" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cafe</Link>
-              <Link href="/gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Gallery</Link>
-              <Link href="/story" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Story</Link>
+              <Link href="/group" className="text-sm text-muted-foreground hover:text-foreground transition-colors">대형 단체 펜션</Link>
+              <Link href="/pension" className="text-sm text-muted-foreground hover:text-foreground transition-colors">독채·객실</Link>
+              <Link href="/military-visit" className="text-sm text-muted-foreground hover:text-foreground transition-colors">제2야수교 면회</Link>
+              <Link href="/campnic" className="text-sm text-muted-foreground hover:text-foreground transition-colors">캠프닉</Link>
+              <Link href="/gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">갤러리</Link>
+              <Link href="/story" className="text-sm text-muted-foreground hover:text-foreground transition-colors">스토리</Link>
             </div>
           </div>
           <div>
             <h4 className="text-xs font-body font-medium tracking-[0.2em] uppercase text-accent mb-6 border-b border-accent/20 pb-2">Contact</h4>
             <div className="flex flex-col gap-4">
-              <a href="tel:010-9038-5822" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-col">
+              <a href={`tel:${siteConfig.telephone}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-col">
                 <span className="text-[10px] text-accent/50 mb-0.5">Phone</span>
-                010.9038.5822
+                {siteConfig.telephone}
+              </a>
+              <a href={NAVER_PLACE_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-col">
+                <span className="text-[10px] text-accent/50 mb-0.5">Map</span>
+                네이버 플레이스
               </a>
               <a href="mailto:trustprice@naver.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-col">
                 <span className="text-[10px] text-accent/50 mb-0.5">Email</span>

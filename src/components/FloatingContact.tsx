@@ -3,10 +3,17 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/lib/site-config";
+
+interface HomeContentItem {
+  section: string;
+  key: string;
+  value: string;
+}
 
 const FloatingContact = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [content, setContent] = useState({ line1: "예약문의 010-9038-5822", line2: "" });
+  const [content, setContent] = useState({ line1: `예약문의 ${siteConfig.telephone}`, line2: "" });
 
   useEffect(() => {
     // Show after a short delay
@@ -15,11 +22,11 @@ const FloatingContact = () => {
     // Fetch custom text
     fetch("/api/admin/content?page=home")
       .then(res => res.json())
-      .then(data => {
-        const l1 = data.find((c: any) => c.section === "floating" && c.key === "line1")?.value;
-        const l2 = data.find((c: any) => c.section === "floating" && c.key === "line2")?.value;
+      .then((data: HomeContentItem[]) => {
+        const l1 = data.find((item) => item.section === "floating" && item.key === "line1")?.value;
+        const l2 = data.find((item) => item.section === "floating" && item.key === "line2")?.value;
         setContent({ 
-          line1: l1 || "예약문의 010-9038-5822", 
+          line1: l1 || `예약문의 ${siteConfig.telephone}`,
           line2: l2 || "" 
         });
       })
@@ -39,10 +46,11 @@ const FloatingContact = () => {
           className="fixed bottom-[24px] right-[24px] md:bottom-[40px] md:right-[40px] z-[9999]"
         >
           <motion.a
-            href="tel:010-9038-5822"
+            href={`tel:${siteConfig.telephone}`}
             whileHover={{ y: -5, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="group relative flex items-center gap-4 pl-2 pr-6 py-2 rounded-full bg-black/80 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:shadow-secondary/20 transition-shadow duration-500"
+            aria-label="스테이남천 전화 예약 문의"
+            className="group relative flex items-center gap-4 rounded-full border border-white/20 bg-black/80 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-2xl transition-shadow duration-500 hover:shadow-secondary/20 md:pl-2 md:pr-6"
           >
             {/* Ambient Glow Effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-secondary/50 to-accent/50 rounded-full opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
@@ -63,7 +71,7 @@ const FloatingContact = () => {
               <Phone size={20} className="relative z-10 fill-current" />
             </div>
             
-            <div className="relative flex flex-col pt-0.5">
+            <div className="relative hidden flex-col pt-0.5 md:flex">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40 leading-none">
                   Stay Namcheon

@@ -17,20 +17,32 @@ interface ScrollSectionProps {
   children?: React.ReactNode;
 }
 
+interface HomeSectionContent {
+  label?: string;
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+interface ContentResponseItem {
+  key: string;
+  value: string;
+}
+
 const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, description: defaultDescription, image: defaultImage, imageAlt, exploreHref = "/pension" }: ScrollSectionProps) => {
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<HomeSectionContent | null>(null);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-15%" });
 
   useEffect(() => {
     fetch(`/api/admin/content?page=home&section=${id}`)
       .then(res => res.json())
-      .then(data => {
-        const sectionData: any = {};
-        data.forEach((item: any) => {
+      .then((data: ContentResponseItem[]) => {
+        const sectionData: Record<string, string> = {};
+        data.forEach((item) => {
           sectionData[item.key] = item.value;
         });
-        setContent(sectionData);
+        setContent(sectionData as HomeSectionContent);
       });
   }, [id]);
 
@@ -111,7 +123,7 @@ const ScrollSection = ({ id, label: defaultLabel, title: defaultTitle, descripti
             href={exploreHref}
             className="inline-block border border-primary-foreground/30 px-8 py-3 text-sm font-body font-medium tracking-widest uppercase text-primary-foreground/80 transition-all duration-300 hover:bg-primary-foreground hover:text-foreground"
           >
-            Explore
+            자세히 보기
           </a>
         </motion.div>
       </div>

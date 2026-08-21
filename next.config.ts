@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "xn--q20b145avpd59fmvg.com" }],
+        destination: "https://www.xn--q20b145avpd59fmvg.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -28,12 +38,9 @@ const nextConfig = {
     ],
   },
   reactCompiler: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
 };
 
-export default nextConfig as any;
+export default nextConfig;

@@ -228,7 +228,7 @@ export default function ChatWidget() {
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 bg-[#DB5461] text-white">
             <div>
-              <p className="font-bold text-sm">스테이 남천</p>
+              <p className="font-bold text-sm">스테이남천</p>
               <p className="text-[11px] opacity-80">실시간 채팅문의</p>
             </div>
             <button onClick={() => setOpen(false)} className="p-1 hover:bg-white/20 rounded-lg transition-colors">

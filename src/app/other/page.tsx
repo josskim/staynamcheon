@@ -3,12 +3,12 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "부대시설",
-  description: "해먹 테라스, 수영장, 불멍 공간까지. 경산 스테이 남천의 다양한 부대시설을 경험하세요.",
-  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/other" },
+  description: "해먹 테라스, 수영장, 불멍 공간까지. 경산 스테이남천의 다양한 부대시설을 경험하세요.",
+  alternates: { canonical: "https://www.xn--q20b145avpd59fmvg.com/other" },
   openGraph: {
-    title: "부대시설 | 스테이 남천",
-    description: "해먹 테라스·수영장·불멍. 스테이 남천 부대시설 안내.",
-    images: [{ url: "/images/lovable/other.jpg", width: 1200, height: 630, alt: "스테이 남천 부대시설" }],
+    title: "부대시설 | 스테이남천",
+    description: "해먹 테라스·수영장·불멍. 스테이남천 부대시설 안내.",
+    images: [{ url: "/images/lovable/other.jpg", width: 1200, height: 630, alt: "스테이남천 부대시설" }],
   },
 };
 

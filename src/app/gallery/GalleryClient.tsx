@@ -160,7 +160,7 @@ export default function GalleryClient() {
     if (typeof window === "undefined") return;
 
     const shareData = {
-      title: "StayNamcheon | 프리미엄 펜션 스테이 남천",
+      title: "스테이남천 | 경산 대형 단체 펜션",
       text: "StayNamcheon의 아름다운 순간들을 확인해보세요.",
       url: window.location.href,
     };

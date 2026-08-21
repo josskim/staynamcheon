@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import prisma from "@/lib/db";
 import StoryDetailClient from "./StoryDetailClient";
+import { SITE_URL } from "@/lib/site-config";
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const params = await props.params;
@@ -23,9 +24,11 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
   return {
     title: `${story.title} | Story | Stay Namcheon`,
     description: plainText,
+    alternates: { canonical: `${SITE_URL}/story/${story.id}` },
     openGraph: {
       title: story.title,
       description: plainText,
+      url: `${SITE_URL}/story/${story.id}`,
       images: [{ url: imageUrl }],
     },
   };

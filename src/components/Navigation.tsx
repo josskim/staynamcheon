@@ -7,13 +7,13 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Pension", href: "/pension" },
-  { label: "Campnic", href: "/campnic" },
-  { label: "Cafe", href: "/cafe" },
-  { label: "Other", href: "/other" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Reservation", href: "/reservation" },
-  { label: "Story", href: "/story" },
+  { label: "단체펜션", href: "/group" },
+  { label: "독채·객실", href: "/pension" },
+  { label: "면회", href: "/military-visit" },
+  { label: "캠프닉", href: "/campnic" },
+  { label: "갤러리", href: "/gallery" },
+  { label: "예약", href: "/reservation" },
+  { label: "스토리", href: "/story" },
 ];
 
 const Navigation = () => {
@@ -31,7 +31,7 @@ const Navigation = () => {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-12">
+        <div className="hidden md:flex items-center gap-7 lg:gap-10">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -39,7 +39,7 @@ const Navigation = () => {
                 key={item.label}
                 href={item.href}
                 className={cn(
-                  "relative text-[10px] font-body font-medium tracking-[0.3em] uppercase text-primary-foreground mix-blend-difference transition-all duration-300 hover:opacity-100",
+                  "relative text-[11px] font-body font-medium tracking-[0.14em] text-primary-foreground mix-blend-difference transition-all duration-300 hover:opacity-100",
                   isActive ? "opacity-100" : "opacity-60 hover:opacity-80"
                 )}
               >

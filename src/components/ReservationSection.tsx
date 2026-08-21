@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { MapPin, Navigation } from "lucide-react";
 import Image from "next/image";
 import { getHeroImageUrl } from "@/lib/cloudinary";
+import { NAVER_PLACE_URL, siteConfig } from "@/lib/site-config";
 
 const ReservationSection = () => {
   const ref = useRef(null);
@@ -21,7 +22,7 @@ const ReservationSection = () => {
       <motion.div className="absolute inset-[-15%] w-[130%] h-[130%] z-0" style={{ y }}>
         <Image
           src={getHeroImageUrl("/images/lovable/hero.jpg")}
-          alt="Stay Namcheon landscape"
+          alt="경산 대형 단체 펜션 스테이남천 전경"
           fill
           sizes="130vw"
           className="object-cover"
@@ -45,7 +46,7 @@ const ReservationSection = () => {
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            Book Your Stay
+            예약 및 위치 안내
           </motion.span>
 
           <motion.h2
@@ -54,7 +55,7 @@ const ReservationSection = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.4, duration: 1 }}
           >
-            Location<span className="text-secondary">.</span>
+            스테이남천<span className="text-secondary">.</span>
           </motion.h2>
 
           <motion.div
@@ -74,7 +75,7 @@ const ReservationSection = () => {
               경상북도 경산시 남천면 남천로 31 스테이남천
             </p>
             <p className="font-body text-sm md:text-base font-light leading-relaxed text-primary-foreground/60">
-              Escape to the quiet beauty of Namcheon. Whether you seek a peaceful pension room, an outdoor campnic experience, or simply a cup of coffee surrounded by nature — we're here to welcome you.
+              대형 단체 숙박, 독채 객실, 제2야수교 면회객 당일 이용, 캠프닉까지 날짜와 인원을 알려주시면 가장 적합한 이용 방법을 안내해 드립니다.
             </p>
           </motion.div>
 
@@ -85,13 +86,13 @@ const ReservationSection = () => {
             transition={{ delay: 1, duration: 0.6 }}
           >
             <a
-              href="tel:010-9038-5822"
+              href={`tel:${siteConfig.telephone}`}
               className="group flex items-center gap-3 border border-secondary/50 px-8 py-4 text-sm font-body font-medium tracking-widest uppercase text-white transition-all duration-300 hover:bg-secondary hover:border-secondary shadow-lg hover:shadow-secondary/20"
             >
-              Call to Reserve
+              전화 예약 문의
             </a>
             <a
-              href="https://map.naver.com/p/search/%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EA%B2%BD%EC%82%B0%EC%8B%9C%20%EB%82%A8%EC%B2%9C%EB%A9%B4%20%EB%82%A8%EC%B2%9C%EB%A1%9C%2031%20%EC%8A%A4%ED%85%8C%EC%9D%B4%EB%82%A8%EC%B2%9C"
+              href={NAVER_PLACE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-3 bg-[#03C75A]/10 backdrop-blur-md border border-[#03C75A]/20 px-8 py-4 text-sm font-body font-medium tracking-widest uppercase text-white transition-all duration-300 hover:bg-[#03C75A] hover:text-white shadow-lg hover:shadow-[#03C75A]/20"

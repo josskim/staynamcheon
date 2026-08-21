@@ -3,12 +3,12 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "캠프닉",
-  description: "경산 글램핑·피크닉 캠프닉. 복잡한 준비 없이 즐기는 자연 속의 여유, 스테이 남천 캠프닉에서 특별한 당일 추억을 만드세요.",
-  alternates: { canonical: "https://xn--q20b145avpd59fmvg.com/campnic" },
+  description: "경산 당일 캠프닉. 스테이남천에서 1부 11~15시, 2부 17~21시로 캠핑과 피크닉을 간편하게 즐기세요.",
+  alternates: { canonical: "https://www.xn--q20b145avpd59fmvg.com/campnic" },
   openGraph: {
-    title: "캠프닉 | 스테이 남천",
-    description: "경산 글램핑·피크닉. 스테이 남천 캠프닉에서 당일 특별한 추억을.",
-    images: [{ url: "/images/lovable/campnic.jpg", width: 1200, height: 630, alt: "스테이 남천 캠프닉" }],
+    title: "경산 당일 캠프닉 | 스테이남천",
+    description: "경산 캠핑·피크닉. 스테이남천 캠프닉 1부 11~15시, 2부 17~21시.",
+    images: [{ url: "/images/lovable/campnic.jpg", width: 1200, height: 630, alt: "스테이남천 경산 캠프닉" }],
   },
 };
 
