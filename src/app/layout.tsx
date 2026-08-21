@@ -76,6 +76,11 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   manifest: "/manifest.json",
+  verification: {
+    other: {
+      "naver-site-verification": "0ce53a3da4e2331c6f236d211c37afa1a99e675b",
+    },
+  },
   other: {
     "theme-color": "#DB5461",
   },
