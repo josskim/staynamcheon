@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "단체펜션", href: "/group" },
   { label: "독채·객실", href: "/pension" },
-  { label: "면회", href: "/military-visit" },
+  { label: "야수교면회", href: "/military-visit" },
   { label: "캠프닉", href: "/campnic" },
   { label: "갤러리", href: "/gallery" },
   { label: "예약", href: "/reservation" },
