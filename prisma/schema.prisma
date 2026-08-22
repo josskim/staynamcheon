@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["calendar"]
 }
 
 model admin {
@@ -12,6 +14,8 @@ model admin {
   username  String   @unique(map: "Admin_username_key")
   password  String
   createdAt DateTime
+
+  @@schema("calendar")
 }
 
 model reservations {
@@ -34,6 +38,8 @@ model reservations {
   memo           String
   created_at     DateTime @default(now())
   updated_at     DateTime
+
+  @@schema("calendar")
 }
 
 // --- StayNamcheon Management Models (NEW) ---
@@ -47,6 +53,7 @@ model StayAdmin {
   updatedAt DateTime @updatedAt
 
   @@map("stay_admins")
+  @@schema("calendar")
 }
 
 model StayPageContent {
@@ -62,6 +69,7 @@ model StayPageContent {
 
   @@unique([page, section, key])
   @@map("stay_page_contents")
+  @@schema("calendar")
 }
 
 model StayGalleryItem {
@@ -81,6 +89,7 @@ model StayGalleryItem {
   updatedAt   DateTime @updatedAt
 
   @@map("stay_gallery_items")
+  @@schema("calendar")
 }
 
 model PageView {
@@ -100,6 +109,7 @@ model PageView {
   @@index([path])
   @@index([referrerDomain])
   @@map("page_views")
+  @@schema("calendar")
 }
 
 model StayStory {
@@ -114,6 +124,7 @@ model StayStory {
   updatedAt   DateTime @updatedAt
 
   @@map("stay_stories")
+  @@schema("calendar")
 }
 
 // ============================================================
@@ -129,6 +140,7 @@ model ChatVisitor {
   pushSubscriptions VisitorPushSubscription[]
 
   @@map("chat_visitors")
+  @@schema("calendar")
 }
 
 model ChatRoom {
@@ -143,6 +155,7 @@ model ChatRoom {
 
   @@index([updatedAt])
   @@map("chat_rooms")
+  @@schema("calendar")
 }
 
 model ChatMessage {
@@ -157,6 +170,7 @@ model ChatMessage {
 
   @@index([roomId, createdAt])
   @@map("chat_messages")
+  @@schema("calendar")
 }
 
 model VisitorPushSubscription {
@@ -170,6 +184,7 @@ model VisitorPushSubscription {
   visitor   ChatVisitor @relation(fields: [visitorId], references: [id])
 
   @@map("visitor_push_subscriptions")
+  @@schema("calendar")
 }
 
 model AdminPushSubscription {
@@ -181,4 +196,5 @@ model AdminPushSubscription {
   createdAt DateTime @default(now())
 
   @@map("admin_push_subscriptions")
+  @@schema("calendar")
 }
