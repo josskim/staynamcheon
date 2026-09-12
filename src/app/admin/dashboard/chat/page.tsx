@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { useChatPolling, useReliableChat } from "@/lib/use-reliable-chat";
+import { ChatDeliveryStatus } from "@/components/ChatDeliveryStatus";
+import type { ChatMessage as Message } from "@/lib/chat-delivery";
 import {
   Loader2, Send, MessageCircle, User, ArrowLeft, Bell, BellOff,
 } from "lucide-react";
@@ -14,14 +17,6 @@ interface Room {
   lastSender: string | null;
   lastMessageAt: string;
   unreadCount: number;
-}
-
-interface Message {
-  id: string;
-  senderType: "visitor" | "admin";
-  content: string;
-  isRead: boolean;
-  createdAt: string;
 }
 
 function timeAgo(iso: string) {
@@ -40,6 +35,7 @@ function formatTime(iso: string) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Seoul",
   });
 }
 
@@ -48,6 +44,7 @@ function formatDate(iso: string) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Seoul",
   });
 }
 
@@ -75,14 +72,18 @@ export default function AdminChatPage() {
   const searchParams = useSearchParams();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
+  const { messages, refresh: fetchMessages, send, sending, error: messageError } = useReliableChat(selectedRoom, "admin");
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const input = selectedRoom ? drafts[selectedRoom] || "" : "";
+  const setInput = (value: string) => { if (selectedRoom) setDrafts(prev => ({ ...prev, [selectedRoom]: value })); };
+  const [roomsError, setRoomsError] = useState("");
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fetchingRooms = useRef(false);
+  const seenVisitorIds = useRef(new Set<string>());
+  const loadedSoundRoom = useRef<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // 알림음 초기화
@@ -95,38 +96,33 @@ export default function AdminChatPage() {
 
   // 채팅방 목록 로드
   const fetchRooms = useCallback(async () => {
+    if (fetchingRooms.current) return true;
+    fetchingRooms.current = true;
     try {
-      const res = await fetch("/api/admin/chat/rooms");
+      const res = await fetch("/api/admin/chat/rooms", { cache: "no-store", signal: AbortSignal.timeout(15000) });
       const data = await res.json();
-      if (data.ok) setRooms(data.rooms);
-    } catch {} finally {
+      if (!res.ok || !data.ok) throw new Error("조회 실패");
+      setRooms(data.rooms);
+      setRoomsError("");
+      return true;
+    } catch {
+      setRoomsError("문의 목록 연결이 원활하지 않습니다. 기존 목록을 유지하고 자동으로 재시도합니다.");
+      return false;
+    } finally {
+      fetchingRooms.current = false;
       setLoadingRooms(false);
     }
   }, []);
 
-  // 메시지 로드 (매번 전체 fetch → isRead 상태 갱신)
-  const fetchMessages = useCallback(async (rid: string, initial?: boolean) => {
-    try {
-      const params = new URLSearchParams({ roomId: rid });
-      const res = await fetch(`/api/chat/messages?${params}`);
-      const data = await res.json();
-      if (!data.ok) return;
-
-      setMessages((prev) => {
-        const prevIds = new Set(prev.map((m) => m.id));
-        const newVisitorMsgs = initial ? [] : data.messages.filter(
-          (m: Message) => m.senderType === "visitor" && !prevIds.has(m.id)
-        );
-
-        // 방문자 메시지 수신 시 알림음
-        if (newVisitorMsgs.length > 0) {
-          audioRef.current?.play().catch(() => {});
-        }
-
-        return data.messages;
-      });
-    } catch {}
-  }, []);
+  useEffect(() => {
+    if (loadingMsgs) return;
+    const ids = messages.filter(m => m.senderType === "visitor").map(m => m.id);
+    if (loadedSoundRoom.current === selectedRoom && ids.some(id => !seenVisitorIds.current.has(id))) {
+      audioRef.current?.play().catch(() => {});
+    }
+    seenVisitorIds.current = new Set(ids);
+    loadedSoundRoom.current = selectedRoom;
+  }, [messages, selectedRoom, loadingMsgs]);
 
   // 초기 로드
   useEffect(() => {
@@ -139,7 +135,8 @@ export default function AdminChatPage() {
   useEffect(() => {
     if (!selectedRoom) return;
     setLoadingMsgs(true);
-    fetchMessages(selectedRoom, true).then(() => setLoadingMsgs(false));
+    let active = true;
+    fetchMessages(selectedRoom).then(() => { if (active) setLoadingMsgs(false); });
 
     // 읽음 처리
     fetch("/api/chat/read", {
@@ -152,16 +149,15 @@ export default function AdminChatPage() {
     setRooms((prev) =>
       prev.map((r) => (r.id === selectedRoom ? { ...r, unreadCount: 0 } : r))
     );
+    return () => { active = false; };
   }, [selectedRoom, fetchMessages]);
 
   // 폴링: 메시지 + 룸 목록
-  useEffect(() => {
-    pollingRef.current = setInterval(() => {
-      if (selectedRoom) fetchMessages(selectedRoom);
-      fetchRooms();
-    }, 4000);
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
+  const poll = useCallback(async () => {
+    const results = await Promise.all([fetchRooms(), selectedRoom ? fetchMessages(selectedRoom) : Promise.resolve(true)]);
+    return results.every(Boolean);
   }, [selectedRoom, fetchMessages, fetchRooms]);
+  useChatPolling(poll);
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
@@ -208,38 +204,12 @@ export default function AdminChatPage() {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || !selectedRoom || sending) return;
-    const content = input.trim();
-    setInput("");
-    setSending(true);
-
-    const tempMsg: Message = {
-      id: "temp-" + Date.now(),
-      senderType: "admin",
-      content,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-
-    try {
-      const res = await fetch("/api/chat/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: selectedRoom, content, senderType: "admin" }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setMessages((prev) => prev.map((m) => (m.id === tempMsg.id ? data.message : m)));
-      }
-    } catch {} finally {
-      setSending(false);
-    }
+  const handleSend = () => {
+    if (send(input)) setInput("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSend();
     }
@@ -283,6 +253,7 @@ export default function AdminChatPage() {
         </button>
       </div>
 
+      {(roomsError || messageError) && <p role="alert" className="rounded-xl bg-amber-50 text-amber-900 p-3 text-sm">{roomsError || messageError}</p>}
       <div className="flex gap-6 h-[calc(100vh-260px)] min-h-[500px]">
         {/* 채팅방 목록 */}
         <div className={`w-80 shrink-0 bg-white rounded-3xl border border-[#e4dcdd] flex flex-col overflow-hidden ${selectedRoom ? "hidden lg:flex" : "flex"}`}>
@@ -406,9 +377,7 @@ export default function AdminChatPage() {
                                   {formatTime(msg.createdAt)}
                                 </span>
                                 {msg.senderType === "admin" && (
-                                  <span className={`text-[10px] ${msg.isRead ? "text-white/80" : "text-white/40"}`}>
-                                    {msg.isRead ? "읽음" : "안읽음"}
-                                  </span>
+                                  <ChatDeliveryStatus message={msg} disabled={sending} retry={() => send(msg.content, msg)} />
                                 )}
                               </div>
                             </div>

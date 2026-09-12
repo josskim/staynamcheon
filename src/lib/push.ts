@@ -20,7 +20,7 @@ if (VAPID_PUBLIC && VAPID_PRIVATE) {
 async function sendPush(
   subs: { id: string; endpoint: string; p256dh: string; auth: string }[],
   payload: string,
-  deleteStale: (id: string) => Promise<void>
+  deleteStale: (id: string) => Promise<unknown>
 ) {
   return Promise.allSettled(
     subs.map((sub) =>

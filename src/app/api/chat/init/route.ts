@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { v4 as uuidv4 } from "crypto";
 import prisma from "@/lib/db";
 
 function generateNickname() {

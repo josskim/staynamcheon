@@ -2,26 +2,19 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
-
-interface Message {
-  id: string;
-  senderType: "visitor" | "admin";
-  content: string;
-  isRead: boolean;
-  createdAt: string;
-}
+import { useChatPolling, useReliableChat } from "@/lib/use-reliable-chat";
+import { ChatDeliveryStatus } from "./ChatDeliveryStatus";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [nickname, setNickname] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, refresh: fetchMessages, send, sending, error: messageError } = useReliableChat(roomId, "visitor");
   const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
+  const [initError, setInitError] = useState("");
   const [initializing, setInitializing] = useState(false);
   const [unread, setUnread] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const seenAdminIds = useRef<Set<string> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // SW 등록 + 알림음 초기화
@@ -73,9 +66,10 @@ export default function ChatWidget() {
     try {
       const res = await fetch("/api/chat/init", { method: "POST" });
       const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error("채팅 연결 실패");
       if (data.ok) {
+        setInitError("");
         setRoomId(data.roomId);
-        setNickname(data.nickname);
         // 알림 권한 요청 + 구독
         if ("Notification" in window && Notification.permission === "default") {
           Notification.requestPermission().then((p) => {
@@ -86,40 +80,22 @@ export default function ChatWidget() {
         }
       }
     } catch {
-      // ignore
+      setInitError("채팅 연결에 실패했습니다. 잠시 후 다시 연결해 주세요.");
     } finally {
       setInitializing(false);
     }
   }, [roomId, subscribePush]);
 
-  // 메시지 가져오기 (매번 전체 fetch → isRead 상태 갱신)
-  const fetchMessages = useCallback(async (rid: string, isInitial?: boolean) => {
-    try {
-      const params = new URLSearchParams({ roomId: rid });
-      const res = await fetch(`/api/chat/messages?${params}`);
-      const data = await res.json();
-      if (!data.ok) return;
-
-      const prevCount = isInitial ? 0 : undefined;
-
-      setMessages((prev) => {
-        const prevIds = new Set(prev.map((m) => m.id));
-        const newAdminMsgs = isInitial ? [] : data.messages.filter(
-          (m: Message) => m.senderType === "admin" && !prevIds.has(m.id)
-        );
-
-        // 새 admin 메시지 수신 시 알림음 + unread
-        if (newAdminMsgs.length > 0) {
-          audioRef.current?.play().catch(() => {});
-          setUnread((u) => u + newAdminMsgs.length);
-        }
-
-        return data.messages;
-      });
-    } catch {
-      // ignore
+  useEffect(() => {
+    if (!messages.length) return;
+    const ids = messages.filter(m => m.senderType === "admin").map(m => m.id);
+    const newCount = seenAdminIds.current ? ids.filter(id => !seenAdminIds.current!.has(id)).length : 0;
+    if (newCount) {
+      audioRef.current?.play().catch(() => {});
+      if (!open) setUnread(u => u + newCount);
     }
-  }, []);
+    seenAdminIds.current = new Set(ids);
+  }, [messages, open]);
 
   // 위젯 열 때
   useEffect(() => {
@@ -131,22 +107,13 @@ export default function ChatWidget() {
   // roomId 확보 후 초기 메시지 로드
   useEffect(() => {
     if (roomId && open) {
-      fetchMessages(roomId, true);
+      fetchMessages(roomId);
     }
   }, [roomId, open, fetchMessages]);
 
   // 폴링
-  useEffect(() => {
-    if (!roomId) return;
-
-    pollingRef.current = setInterval(() => {
-      fetchMessages(roomId);
-    }, 4000);
-
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [roomId, fetchMessages]);
+  const poll = useCallback(() => roomId ? fetchMessages(roomId) : Promise.resolve(true), [roomId, fetchMessages]);
+  useChatPolling(poll, !!roomId);
 
   // 스크롤
   useEffect(() => {
@@ -159,7 +126,7 @@ export default function ChatWidget() {
       setUnread(0);
       // 앱 뱃지 클리어
       if ("clearAppBadge" in navigator) {
-        (navigator as any).clearAppBadge().catch(() => {});
+        (navigator as Navigator & { clearAppBadge?: () => Promise<void> }).clearAppBadge?.().catch(() => {});
       }
       navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_BADGE" });
       fetch("/api/chat/read", {
@@ -170,43 +137,12 @@ export default function ChatWidget() {
     }
   }, [open, roomId]);
 
-  const handleSend = async () => {
-    if (!input.trim() || !roomId || sending) return;
-    const content = input.trim();
-    setInput("");
-    setSending(true);
-
-    // Optimistic
-    const tempMsg: Message = {
-      id: "temp-" + Date.now(),
-      senderType: "visitor",
-      content,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-
-    try {
-      const res = await fetch("/api/chat/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, content, senderType: "visitor" }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempMsg.id ? data.message : m))
-        );
-      }
-    } catch {
-      // keep optimistic msg
-    } finally {
-      setSending(false);
-    }
+  const handleSend = () => {
+    if (send(input)) setInput("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSend();
     }
@@ -217,6 +153,7 @@ export default function ChatWidget() {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
+      timeZone: "Asia/Seoul",
     });
   }
 
@@ -237,6 +174,10 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
+          {(initError || messageError) && <div role="alert" className="p-3 bg-amber-50 text-amber-900 text-xs">
+            {initError || messageError}
+            {initError && <button disabled={initializing} onClick={initChat} className="ml-2 underline">다시 연결</button>}
+          </div>}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f6f6] min-h-[280px] max-h-[360px]">
             {initializing ? (
               <div className="flex items-center justify-center h-full">
@@ -274,9 +215,7 @@ export default function ChatWidget() {
                         {formatTime(msg.createdAt)}
                       </span>
                       {msg.senderType === "visitor" && (
-                        <span className={`text-[10px] ${msg.isRead ? "text-white/80" : "text-white/40"}`}>
-                          {msg.isRead ? "읽음" : "안읽음"}
-                        </span>
+                        <ChatDeliveryStatus message={msg} disabled={sending} retry={() => send(msg.content, msg)} />
                       )}
                     </div>
                   </div>
