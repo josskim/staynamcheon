@@ -7,7 +7,7 @@
     "build": "npm test && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --import tsx --test tests/*.test.mjs",
+    "test": "node tests/run.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -100,21 +100,25 @@ test('same key different content conflicts; different room or sender is independ
   assert.equal(f.rows.size, 3);
 });
 
-test('database create/update failure rolls back and never pushes', async () => {
+test('database create/update failure rolls back and never pushes', async t => {
+  const logged = t.mock.method(console, 'error', () => {});
   for (const option of ['failCreate', 'failUpdate']) {
     const f = fixture({ [option]: true });
     assert.equal((await f.post()).status, 500);
     assert.equal(f.rows.size, 0); assert.equal(f.after.length, 0);
   }
+  assert.equal(logged.mock.callCount(), 2);
 });
 
-test('push failure cannot turn a durable save into a failed POST', async () => {
+test('push failure cannot turn a durable save into a failed POST', async t => {
+  const logged = t.mock.method(console, 'error', () => {});
   const f = fixture({ failPush: true });
   assert.equal((await f.post()).status, 200);
   await assert.doesNotReject(f.after[0]);
   assert.equal(f.rows.size, 1);
   assert.equal((await f.post()).status, 200);
   assert.equal(f.stats().pushes, 1);
+  assert.equal(logged.mock.callCount(), 1);
 });
 
 test('reject unauthenticated/foreign-room/invalid requests; support old clients', async () => {
